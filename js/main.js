@@ -4,6 +4,7 @@ import {
   FOOD_TYPE_LABELS,
   dailyEnergyNeedKcal,
   foodEnergyKcalPer100g,
+  foodCarbsPercent,
   feedingGramsPerDay,
   dailyWaterNeedMl,
   foodWaterGramsPerDay,
@@ -159,12 +160,13 @@ function renderFoodList() {
     li.dataset.id = food.id;
 
     const kcal100g = foodEnergyKcalPer100g(food);
+    const carbsPercent = foodCarbsPercent(food);
 
     li.innerHTML = `
       <div class="profile-card__main">
         <span class="profile-card__name">${food.name}</span>
         <span class="profile-card__meta">${FOOD_TYPE_LABELS[food.typ]}</span>
-        <span class="profile-card__kcal">${kcal100g.toFixed(1)} kcal/100g</span>
+        <span class="profile-card__kcal">${kcal100g.toFixed(1)} kcal/100g &middot; ${carbsPercent.toFixed(1)}% Kohlenhydrate (berechnet)</span>
       </div>
       <div class="profile-card__actions">
         <button type="button" class="btn-text" data-action="edit">Bearbeiten</button>
@@ -202,6 +204,16 @@ foodForm.addEventListener("submit", (event) => {
     foodFormError.textContent = "Name darf nicht leer sein.";
     foodFormError.hidden = false;
     return;
+  }
+
+  // A 0% field is usually a forgotten entry rather than a real value; ask
+  // before saving instead of silently accepting it.
+  const zeroFieldLabels = { feuchte: "Feuchte", protein: "Protein", fett: "Fett", rohfaser: "Rohfaser", rohasche: "Rohasche" };
+  const zeroFields = Object.keys(zeroFieldLabels).filter((key) => entry[key] === 0).map((key) => zeroFieldLabels[key]);
+  if (zeroFields.length > 0) {
+    const verb = zeroFields.length === 1 ? "ist" : "sind";
+    const confirmed = window.confirm(`${zeroFields.join(", ")} ${verb} auf 0% gesetzt. Trotzdem speichern?`);
+    if (!confirmed) return;
   }
 
   const id = foodIdField.value;

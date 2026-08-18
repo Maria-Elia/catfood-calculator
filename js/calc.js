@@ -41,7 +41,7 @@ export function dailyEnergyNeedKcal(weightKg, status) {
   return rerKcal(weightKg) * factor;
 }
 
-export function foodEnergyKcalPer100g({ feuchte, protein, fett, rohfaser, rohasche }) {
+function computeNfe({ feuchte, protein, fett, rohfaser, rohasche }) {
   const inputs = { feuchte, protein, fett, rohfaser, rohasche };
   for (const [key, value] of Object.entries(inputs)) {
     if (typeof value !== "number" || value < 0 || value > 100) {
@@ -58,6 +58,20 @@ export function foodEnergyKcalPer100g({ feuchte, protein, fett, rohfaser, rohasc
   if (nfe < 0) {
     throw new Error("Nährwerte summieren sich auf mehr als die Trockensubstanz.");
   }
+
+  return { ts, nfe };
+}
+
+// NfE (stickstofffreie Extraktstoffe): the Weender scheme's carbohydrate
+// remainder, rarely declared directly on pet food labels, so it's derived
+// from the other five fields rather than entered by the user.
+export function foodCarbsPercent(food) {
+  return computeNfe(food).nfe;
+}
+
+export function foodEnergyKcalPer100g(food) {
+  const { protein, fett, rohfaser } = food;
+  const { ts, nfe } = computeNfe(food);
 
   // Weender/Kienzle metabolizable-energy formula. 0.024/0.038/0.017 are
   // per-gram energy conversion factors (protein/fat/carbs); 87.9/0.88 is

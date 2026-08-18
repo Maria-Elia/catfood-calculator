@@ -6,6 +6,7 @@ import {
   STATUS_FACTORS,
   FOOD_TYPE_LABELS,
   foodEnergyKcalPer100g,
+  foodCarbsPercent,
   feedingGramsPerDay,
   dailyWaterNeedMl,
   foodWaterGramsPerDay,
@@ -64,6 +65,23 @@ test('foodEnergyKcalPer100g rejects feuchte at or above 100', () => {
   assert.throws(
     () => foodEnergyKcalPer100g({ feuchte: 100, protein: 0, fett: 0, rohfaser: 0, rohasche: 0 }),
     /Feuchte/
+  );
+});
+
+test('foodCarbsPercent returns the NfE remainder for a typical dry food', () => {
+  const result = foodCarbsPercent({ feuchte: 8, protein: 30, fett: 15, rohfaser: 2, rohasche: 7 });
+  assert.equal(result, 38);
+});
+
+test('foodCarbsPercent returns close to 0 for a wet food with little carb content', () => {
+  const result = foodCarbsPercent({ feuchte: 80, protein: 10, fett: 6, rohfaser: 0.5, rohasche: 2 });
+  assert.ok(Math.abs(result - 1.5) < 0.001, `expected ~1.5, got ${result}`);
+});
+
+test('foodCarbsPercent rejects values that do not add up (negative NfE)', () => {
+  assert.throws(
+    () => foodCarbsPercent({ feuchte: 10, protein: 40, fett: 40, rohfaser: 10, rohasche: 10 }),
+    /Nährwerte/
   );
 });
 
