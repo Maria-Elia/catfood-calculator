@@ -1,15 +1,18 @@
 import { createCatStore, createFoodStore } from "./storage.js";
 import {
   STATUS_LABELS,
+  FOOD_TYPE_LABELS,
   dailyEnergyNeedKcal,
   foodEnergyKcalPer100g,
   feedingGramsPerDay,
   dailyWaterNeedMl,
   foodWaterGramsPerDay,
 } from "./calc.js";
+import { initMealPlanner } from "./mealPlanner.js";
 
 const catStore = createCatStore(window.localStorage);
 const foodStore = createFoodStore(window.localStorage);
+const mealPlanner = initMealPlanner({ catStore, foodStore });
 
 // ---- Cats ----
 
@@ -93,6 +96,7 @@ catForm.addEventListener("submit", (event) => {
   renderCatList();
   renderCatOptions();
   updateResult();
+  mealPlanner.refresh();
 });
 
 // One delegated listener, the list is rebuilt on every render
@@ -117,18 +121,13 @@ catList.addEventListener("click", (event) => {
     renderCatList();
     renderCatOptions();
     updateResult();
+    mealPlanner.refresh();
   }
 });
 
 renderCatList();
 
 // ---- Foods ----
-
-// UI copy for the typ tag
-const FOOD_TYPE_LABELS = {
-  trocken: "Trockenfutter",
-  nass: "Nassfutter",
-};
 
 const foodForm = document.getElementById("food-form");
 const foodIdField = document.getElementById("food-id");
@@ -216,6 +215,7 @@ foodForm.addEventListener("submit", (event) => {
   renderFoodList();
   renderFoodOptions();
   updateResult();
+  mealPlanner.refresh();
 });
 
 foodList.addEventListener("click", (event) => {
@@ -243,6 +243,7 @@ foodList.addEventListener("click", (event) => {
     renderFoodList();
     renderFoodOptions();
     updateResult();
+    mealPlanner.refresh();
   }
 });
 
@@ -390,3 +391,16 @@ foodSelect.addEventListener("change", updateResult);
 renderCatOptions();
 renderFoodOptions();
 updateResult();
+
+const useAsMealBtn = document.getElementById("use-as-meal-btn");
+useAsMealBtn.addEventListener("click", () => {
+  const cat = catStore.list().find((item) => item.id === catSelect.value);
+  const food = foodStore.list().find((item) => item.id === foodSelect.value);
+  if (!cat || !food) return;
+
+  const dailyKcal = dailyEnergyNeedKcal(cat.gewicht, cat.status);
+  const kcal100g = foodEnergyKcalPer100g(food);
+  const grams = feedingGramsPerDay(dailyKcal, kcal100g);
+
+  mealPlanner.useAsMealBase(cat.id, food.id, Math.round(grams));
+});
