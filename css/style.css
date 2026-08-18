@@ -1,5 +1,5 @@
-/* Fixed light theme, no dark mode. Teal is the sole accent, 
-  pink is a tertiary voice only, ptext is purple */
+/* Fixed light theme, no dark mode. Teal is the sole accent, pink is a
+   tertiary voice only.*/
 :root {
   --teal: #0f7f88;
   /* Separate darker token for text/background use - #0f7f88 alone falls
@@ -39,7 +39,7 @@ html {
 
 body {
   font-family: "Poppins", sans-serif;
-  color: var(--purple-text);
+  color: var(--ink);
   background: var(--bg);
 }
 
@@ -102,7 +102,7 @@ button {
 .hero__title {
   font-size: clamp(2.8rem, 5vw, 4.8rem);
   font-weight: 600;
-  color: var(--purple-text);
+  color: var(--ink);
   line-height: 1.15;
   margin-bottom: 1.8rem;
 }
@@ -130,7 +130,7 @@ main {
   align-items: center;
   gap: 1.1rem;
   font-size: 2.6rem;
-  color: var(--purple-text);
+  color: var(--ink);
   margin-bottom: 2rem;
 }
 
@@ -327,7 +327,7 @@ main {
 .profile-card__name {
   font-size: 1.6rem;
   font-weight: 700;
-  color: var(--purple-text);
+  color: var(--ink);
 }
 
 .profile-card__meta {
