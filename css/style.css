@@ -376,6 +376,15 @@ main {
   padding: 3rem 2rem;
   color: var(--ink-soft);
   font-size: 1.3rem;
+  background: var(--teal-tint);
+}
+
+.site-footer__wordmark {
+  font-family: "Fredoka", sans-serif;
+  font-weight: 600;
+  font-size: 1.6rem;
+  color: var(--teal-deep);
+  margin-bottom: 0.8rem;
 }
 
 /* ---- responsive ---- */
