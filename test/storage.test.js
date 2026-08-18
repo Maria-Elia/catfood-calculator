@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createCatStore, createFoodStore } from '../js/storage.js';
+import { createCatStore, createFoodStore, createMealStore } from '../js/storage.js';
 
 function createMemoryBackend() {
   const store = new Map();
@@ -70,4 +70,39 @@ test('food store add() persists a food profile', () => {
   });
   assert.equal(food.typ, 'nass');
   assert.equal(store.list().length, 1);
+});
+
+test('meal store returns an empty list for a cat with no saved meal', () => {
+  const store = createMealStore(createMemoryBackend());
+  assert.deepEqual(store.getComponents('cat-1'), []);
+});
+
+test('meal store setComponents() persists components scoped to a cat', () => {
+  const store = createMealStore(createMemoryBackend());
+  store.setComponents('cat-1', [{ foodId: 'food-a', grams: 100 }]);
+  assert.deepEqual(store.getComponents('cat-1'), [{ foodId: 'food-a', grams: 100 }]);
+});
+
+test('meal store keeps components separate per cat', () => {
+  const store = createMealStore(createMemoryBackend());
+  store.setComponents('cat-1', [{ foodId: 'food-a', grams: 100 }]);
+  store.setComponents('cat-2', [{ foodId: 'food-b', grams: 50 }]);
+  assert.deepEqual(store.getComponents('cat-1'), [{ foodId: 'food-a', grams: 100 }]);
+  assert.deepEqual(store.getComponents('cat-2'), [{ foodId: 'food-b', grams: 50 }]);
+});
+
+test("meal store setComponents() overwrites a cat's previous components", () => {
+  const store = createMealStore(createMemoryBackend());
+  store.setComponents('cat-1', [{ foodId: 'food-a', grams: 100 }]);
+  store.setComponents('cat-1', [{ foodId: 'food-b', grams: 50 }]);
+  assert.deepEqual(store.getComponents('cat-1'), [{ foodId: 'food-b', grams: 50 }]);
+});
+
+test('meal store persists independently from the cat/food stores on the same backend', () => {
+  const backend = createMemoryBackend();
+  const cats = createCatStore(backend);
+  const meals = createMealStore(backend);
+  cats.add({ name: 'Mia', gewicht: 4, status: 'erwachsen_kastriert' });
+  assert.deepEqual(meals.getComponents('anything'), []);
+  assert.equal(cats.list().length, 1);
 });

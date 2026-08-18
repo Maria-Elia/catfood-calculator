@@ -4,6 +4,7 @@
 
 const CATS_KEY = 'catfood_cats';
 const FOODS_KEY = 'catfood_foods';
+const MEALS_KEY = 'catfood_meals';
 
 function readAll(backend, key) {
   const raw = backend.getItem(key);
@@ -54,4 +55,27 @@ export function createCatStore(backend) {
 
 export function createFoodStore(backend) {
   return createStore(backend, FOODS_KEY);
+}
+
+function readMeals(backend) {
+  const raw = backend.getItem(MEALS_KEY);
+  return raw ? JSON.parse(raw) : {};
+}
+
+function writeMeals(backend, meals) {
+  backend.setItem(MEALS_KEY, JSON.stringify(meals));
+}
+
+export function createMealStore(backend) {
+  return {
+    getComponents(catId) {
+      const meals = readMeals(backend);
+      return meals[catId] || [];
+    },
+    setComponents(catId, components) {
+      const meals = readMeals(backend);
+      meals[catId] = components;
+      writeMeals(backend, meals);
+    },
+  };
 }
