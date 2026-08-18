@@ -254,6 +254,8 @@ const resultEmpty = document.getElementById("result-empty");
 const resultKcal = document.getElementById("result-kcal");
 const resultKcal100 = document.getElementById("result-kcal100");
 const resultGrams = document.getElementById("result-grams");
+const onboardingBanner = document.getElementById("onboarding-banner");
+const onboardingBannerContent = document.getElementById("onboarding-banner-content");
 
 function renderCatOptions() {
   // Preserve the current selection across a rebuild where possible
@@ -280,6 +282,62 @@ function renderFoodOptions() {
   foodSelect.value = foodStore.list().some((food) => food.id === selected) ? selected : "";
 }
 
+// Shown instead of the plain "pick a cat and a food" hint when one or both
+// lists are still empty
+const ONBOARDING_MESSAGES = {
+  both: {
+    text: "Du hast noch keine Katze und kein Futter gespeichert. Leg zuerst unten eine Katze an, dann ein Futter. Danach kannst du hier oben auswählen.",
+    links: [
+      { href: "#katzen", focusId: "cat-name", label: "Katze anlegen" },
+      { href: "#futter", focusId: "food-name", label: "Futter anlegen" },
+    ],
+  },
+  cat: {
+    text: "Du hast noch keine Katze gespeichert. Leg unten eine an, dann kannst du sie hier oben auswählen.",
+    links: [{ href: "#katzen", focusId: "cat-name", label: "Katze anlegen" }],
+  },
+  food: {
+    text: "Du hast noch kein Futter gespeichert. Leg unten eins an, dann kannst du es hier oben auswählen.",
+    links: [{ href: "#futter", focusId: "food-name", label: "Futter anlegen" }],
+  },
+};
+
+function buildOnboardingLinksHtml(message) {
+  return message.links
+    .map(
+      (link) =>
+        `<a class="onboarding-banner__link" href="${link.href}" data-focus="${link.focusId}">${link.label}</a>`,
+    )
+    .join("");
+}
+
+function resetToDefaultEmptyHint() {
+  resultEmpty.className = "empty-state";
+  resultEmpty.textContent = "Wähl eine Katze und ein Futter aus, um die Tagesmenge zu berechnen.";
+}
+
+function renderBannerHint(kind) {
+  const message = ONBOARDING_MESSAGES[kind];
+  onboardingBannerContent.innerHTML = `<p>${message.text}</p><div class="onboarding-banner__actions">${buildOnboardingLinksHtml(message)}</div>`;
+  onboardingBanner.hidden = false;
+}
+
+function hideBanner() {
+  onboardingBanner.hidden = true;
+}
+
+// Clicking an onboarding link scrolls to the right section (native anchor
+// behavior) and then focuses its first field, so typing can start right
+// away instead of the user having to find and click into the input.
+onboardingBanner.addEventListener("click", (event) => {
+  const link = event.target.closest(".onboarding-banner__link");
+  if (!link) return;
+  const field = document.getElementById(link.dataset.focus);
+  if (field) {
+    window.setTimeout(() => field.focus(), 400);
+  }
+});
+
 function updateResult() {
   // Re-read from the store rather than caching the selected objects
   const cat = catStore.list().find((item) => item.id === catSelect.value);
@@ -288,8 +346,25 @@ function updateResult() {
   if (!cat || !food) {
     resultPanel.hidden = true;
     resultEmpty.hidden = false;
+
+    resetToDefaultEmptyHint();
+
+    const hasCats = catStore.list().length > 0;
+    const hasFoods = foodStore.list().length > 0;
+    if (!hasCats && !hasFoods) {
+      renderBannerHint("both");
+    } else if (!hasCats) {
+      renderBannerHint("cat");
+    } else if (!hasFoods) {
+      renderBannerHint("food");
+    } else {
+      hideBanner();
+    }
     return;
   }
+
+  // A valid cat and food are picked, so both profile lists exist already, no onboarding
+  hideBanner();
 
   const dailyKcal = dailyEnergyNeedKcal(cat.gewicht, cat.status);
   const kcal100g = foodEnergyKcalPer100g(food);
