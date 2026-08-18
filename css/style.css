@@ -401,8 +401,24 @@ main {
   margin: 2rem 0 1.6rem;
 }
 
-.meal-planner__add-row .btn-pill {
+.meal-planner__add-row .btn-pill,
+.meal-planner__save-row .btn-pill {
   align-self: flex-end;
+}
+
+.meal-planner__save-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1.4rem;
+  margin: 2.4rem 0 1rem;
+}
+
+.meal-planner__subtitle {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 2.4rem 0 1rem;
 }
 
 .meal-planner__add-field {

@@ -183,6 +183,20 @@
             <span id="meal-summary-water-extra" class="meal-summary__value"></span>
           </div>
         </div>
+
+        <div class="meal-planner__save-row">
+          <div class="meal-planner__add-field">
+            <label for="meal-name-input">Name</label>
+            <input type="text" id="meal-name-input" placeholder="z. B. Frühstück" />
+          </div>
+          <button type="button" id="meal-save-btn" class="btn-pill">Mahlzeit speichern</button>
+          <button type="button" id="meal-new-btn" class="btn-text">Neue Mahlzeit</button>
+        </div>
+        <p id="meal-save-error" class="form-error" hidden></p>
+
+        <h3 class="meal-planner__subtitle">Meine Mahlzeiten</h3>
+        <ul id="meal-saved-list" class="profile-list"></ul>
+        <p id="meal-saved-empty" class="empty-state">Noch keine Mahlzeit für diese Katze gespeichert.</p>
       </div>
     </section>
 
