@@ -1,5 +1,7 @@
-// Pure calculation functions for cat energy need.
+// Pure calculation functions for cat energy need and food energy content.
+// main.js shows error.message directly in the UI,
 
+// Neutered cats need less energy than other ones at the same weight
 export const STATUS_FACTORS = {
   kitten_bis_4_monate: 3.0,
   kitten_4_bis_12_monate: 2.0,
@@ -20,6 +22,8 @@ export function rerKcal(weightKg) {
   if (typeof weightKg !== "number" || !(weightKg > 0)) {
     throw new Error("Gewicht muss eine Zahl größer als 0 sein.");
   }
+  // Resting Energy Requirement: allometric scaling, not linear per kg
+  // a heavier cat's metabolism doesn't scale 1:1 with body mass.
   return 70 * Math.pow(weightKg, 0.75);
 }
 
@@ -49,13 +53,17 @@ export function foodEnergyKcalPer100g({ feuchte, protein, fett, rohfaser, rohasc
     throw new Error("Nährwerte summieren sich auf mehr als die Trockensubstanz.");
   }
 
+  // Weender/Kienzle metabolizable-energy formula. 0.024/0.038/0.017 are
+  // per-gram energy conversion factors (protein/fat/carbs); 87.9/0.88 is
+  // a cat-specific digestibility regression against fiber content; 0.0031
+  // corrects for energy cats lose as urinary nitrogen, not gut energy.
   const rfaInTs = (100 / ts) * rohfaser;
   const ge = 0.024 * protein + 0.038 * fett + 0.017 * rohfaser + 0.017 * nfe;
   const sv = 87.9 - 0.88 * rfaInTs;
   const de = (ge * sv) / 100;
   const me = de - 0.0031 * protein;
 
-  return me * 239;
+  return me * 239; // 1 MJ = 239 kcal
 }
 
 export function feedingGramsPerDay(dailyKcalNeed, kcalPer100g) {
