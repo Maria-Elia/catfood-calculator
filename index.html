@@ -76,9 +76,39 @@
           <span id="result-water-extra" class="result-panel__value result-panel__value--water-accent"></span>
         </div>
       </div>
-      <p id="result-empty" class="empty-state">
-        Wähl eine Katze und ein Futter aus, um die Tagesmenge zu berechnen.
-      </p>
+      <div id="result-empty" class="result-preview">
+        <div class="result-preview__rows" aria-hidden="true">
+          <div class="result-preview__row">
+            <span class="result-preview__label">Tagesbedarf</span>
+            <span class="result-preview__value">—</span>
+          </div>
+          <div class="result-preview__row">
+            <span class="result-preview__label">Futter enthält</span>
+            <span class="result-preview__value">—</span>
+          </div>
+          <div class="result-preview__row result-preview__row--accent">
+            <span class="result-preview__label">Tagesmenge</span>
+            <span class="result-preview__value result-preview__value--accent">—</span>
+          </div>
+          <div class="result-preview__divider"></div>
+          <div class="result-preview__row">
+            <span class="result-preview__label">Wasserbedarf</span>
+            <span class="result-preview__value">—</span>
+          </div>
+          <div class="result-preview__row">
+            <span class="result-preview__label">Wasser aus Futter</span>
+            <span class="result-preview__value">—</span>
+          </div>
+          <div class="result-preview__row result-preview__row--water-accent">
+            <span class="result-preview__label">Noch extra nötig</span>
+            <span class="result-preview__value result-preview__value--water-accent">—</span>
+          </div>
+        </div>
+        <p class="result-preview__hint">
+          <img class="result-preview__hint-icon" src="assets/svg/cat-food.svg" alt="" aria-hidden="true" />
+          Wähl oben eine Katze und ein Futter aus, um deine Tagesmenge zu berechnen.
+        </p>
+      </div>
     </section>
 
     <section id="katzen" class="profiles">

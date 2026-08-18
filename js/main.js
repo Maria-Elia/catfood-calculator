@@ -317,11 +317,6 @@ function buildOnboardingLinksHtml(message) {
     .join("");
 }
 
-function resetToDefaultEmptyHint() {
-  resultEmpty.className = "empty-state";
-  resultEmpty.textContent = "Wähl eine Katze und ein Futter aus, um die Tagesmenge zu berechnen.";
-}
-
 function renderBannerHint(kind) {
   const message = ONBOARDING_MESSAGES[kind];
   onboardingBannerContent.innerHTML = `<p>${message.text}</p><div class="onboarding-banner__actions">${buildOnboardingLinksHtml(message)}</div>`;
@@ -352,8 +347,6 @@ function updateResult() {
   if (!cat || !food) {
     resultPanel.hidden = true;
     resultEmpty.hidden = false;
-
-    resetToDefaultEmptyHint();
 
     const hasCats = catStore.list().length > 0;
     const hasFoods = foodStore.list().length > 0;
