@@ -28,6 +28,13 @@
 
 html {
   font-size: 10px;
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
@@ -119,9 +126,19 @@ main {
 }
 
 .section-title {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
   font-size: 2.6rem;
   color: var(--purple-text);
   margin-bottom: 2rem;
+}
+
+.section-title__icon {
+  width: 3.2rem;
+  height: 3.2rem;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 
 /* ---- calculator ---- */

@@ -19,17 +19,16 @@
     </svg>
     <div class="hero__inner">
       <p class="hero__kicker">Katzenfutter-Rechner</p>
-      <h1 class="hero__title">Wie viel Futter braucht deine Katze wirklich?</h1>
-      <p class="hero__lede">
-        Gewicht und Kastrationsstatus deiner Katze, dazu die Nährwerte vom
-        Futter-Etikett &mdash; der Rechner sagt dir die Tagesmenge in Gramm.
-      </p>
+      <h1 class="hero__title">Wie viel Futter braucht deine Katze?</h1>
     </div>
   </header>
 
   <main>
     <section id="rechner" class="calculator">
-      <h2 class="section-title">Rechner</h2>
+      <h2 class="section-title">
+        <img class="section-title__icon" src="assets/svg/cat-bowl.svg" alt="" aria-hidden="true" />
+        Schnellrechner
+      </h2>
       <div class="calculator__grid">
         <div class="calculator__picker">
           <label for="cat-select">Katze</label>
@@ -65,7 +64,10 @@
     </section>
 
     <section id="katzen" class="profiles">
-      <h2 class="section-title">Meine Katzen</h2>
+      <h2 class="section-title">
+        <img class="section-title__icon" src="assets/svg/cat.svg" alt="" aria-hidden="true" />
+        Meine Katzen
+      </h2>
       <form id="cat-form" class="profile-form" novalidate>
         <input type="hidden" id="cat-id" value="" />
         <div class="profile-form__row">
@@ -94,7 +96,10 @@
     </section>
 
     <section id="futter" class="profiles">
-      <h2 class="section-title">Mein Futter</h2>
+      <h2 class="section-title">
+        <img class="section-title__icon" src="assets/svg/cat-food.svg" alt="" aria-hidden="true" />
+        Mein Futter
+      </h2>
       <form id="food-form" class="profile-form" novalidate>
         <input type="hidden" id="food-id" value="" />
         <div class="profile-form__row">
@@ -139,7 +144,8 @@
   </main>
 
   <footer class="site-footer">
-    <p>Katzenfutter-Rechner</p>
+    <p>Liebevoll gemacht für Katzenliebhaber &middot; Alle Angaben ohne Gewähr &middot; Tierärztlichen Rat einholen bei
+      Erkrankungen</p>
   </footer>
 
   <script type="module" src="js/main.js"></script>
