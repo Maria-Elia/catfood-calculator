@@ -75,3 +75,22 @@ export function feedingGramsPerDay(dailyKcalNeed, kcalPer100g) {
   }
   return (dailyKcalNeed / kcalPer100g) * 100;
 }
+
+// 50 ml pro kg Körpergewicht/Tag 
+export function dailyWaterNeedMl(weightKg) {
+  if (typeof weightKg !== "number" || !(weightKg > 0)) {
+    throw new Error("Gewicht muss eine Zahl größer als 0 sein.");
+  }
+  return weightKg * 50;
+}
+
+// 1g Feuchte im Futter entspricht ~1ml Wasser.
+export function foodWaterGramsPerDay(feedingGrams, feuchtePercent) {
+  if (typeof feedingGrams !== "number" || feedingGrams <= 0) {
+    throw new Error("Futtermenge muss größer als 0 sein.");
+  }
+  if (typeof feuchtePercent !== "number" || feuchtePercent < 0 || feuchtePercent > 100) {
+    throw new Error("Feuchte muss eine Zahl zwischen 0 und 100 sein.");
+  }
+  return (feedingGrams * feuchtePercent) / 100;
+}

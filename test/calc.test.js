@@ -6,6 +6,8 @@ import {
   STATUS_FACTORS,
   foodEnergyKcalPer100g,
   feedingGramsPerDay,
+  dailyWaterNeedMl,
+  foodWaterGramsPerDay,
 } from '../js/calc.js';
 
 test('rerKcal computes resting energy requirement for a 4kg cat', () => {
@@ -76,4 +78,25 @@ test('feedingGramsPerDay rejects zero or negative food energy', () => {
 test('feedingGramsPerDay rejects zero or negative daily need', () => {
   assert.throws(() => feedingGramsPerDay(0, 95), /Tagesbedarf/);
   assert.throws(() => feedingGramsPerDay(-10, 95), /Tagesbedarf/);
+});
+
+test('dailyWaterNeedMl scales linearly with weight at 50ml/kg', () => {
+  assert.equal(dailyWaterNeedMl(4), 200);
+  assert.equal(dailyWaterNeedMl(2), 100);
+});
+
+test('dailyWaterNeedMl rejects non-positive weight', () => {
+  assert.throws(() => dailyWaterNeedMl(0), /Gewicht/);
+  assert.throws(() => dailyWaterNeedMl(-2), /Gewicht/);
+});
+
+test('foodWaterGramsPerDay derives water content from feeding grams and moisture', () => {
+  assert.equal(foodWaterGramsPerDay(250, 80), 200);
+  assert.equal(foodWaterGramsPerDay(100, 10), 10);
+});
+
+test('foodWaterGramsPerDay rejects invalid inputs', () => {
+  assert.throws(() => foodWaterGramsPerDay(0, 80), /Futtermenge/);
+  assert.throws(() => foodWaterGramsPerDay(250, -1), /Feuchte/);
+  assert.throws(() => foodWaterGramsPerDay(250, 101), /Feuchte/);
 });

@@ -257,6 +257,21 @@ main {
   background: var(--teal-deep);
 }
 
+.result-panel__divider {
+  border-top: 1px solid var(--line);
+  margin: 0.6rem 0;
+}
+
+.result-panel__row--water-accent {
+  background: var(--blue-tint);
+}
+
+.result-panel__value--water-accent {
+  color: var(--blue);
+  font-size: 2rem;
+  font-weight: 700;
+}
+
 .result-panel__label {
   font-size: 1.3rem;
   color: var(--ink-soft);

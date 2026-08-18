@@ -4,6 +4,8 @@ import {
   dailyEnergyNeedKcal,
   foodEnergyKcalPer100g,
   feedingGramsPerDay,
+  dailyWaterNeedMl,
+  foodWaterGramsPerDay,
 } from "./calc.js";
 
 const catStore = createCatStore(window.localStorage);
@@ -38,12 +40,13 @@ function renderCatList() {
     li.dataset.id = cat.id;
 
     const kcal = dailyEnergyNeedKcal(cat.gewicht, cat.status);
+    const waterMl = dailyWaterNeedMl(cat.gewicht);
 
     li.innerHTML = `
       <div class="profile-card__main">
         <span class="profile-card__name">${cat.name}</span>
         <span class="profile-card__meta">${cat.gewicht} kg &middot; ${STATUS_LABELS[cat.status]}</span>
-        <span class="profile-card__kcal">${Math.round(kcal)} kcal/Tag</span>
+        <span class="profile-card__kcal">${Math.round(kcal)} kcal/Tag &middot; ${Math.round(waterMl)} ml Wasser/Tag</span>
       </div>
       <div class="profile-card__actions">
         <button type="button" class="btn-text" data-action="edit">Bearbeiten</button>
@@ -254,6 +257,9 @@ const resultEmpty = document.getElementById("result-empty");
 const resultKcal = document.getElementById("result-kcal");
 const resultKcal100 = document.getElementById("result-kcal100");
 const resultGrams = document.getElementById("result-grams");
+const resultWaterNeed = document.getElementById("result-water-need");
+const resultWaterFood = document.getElementById("result-water-food");
+const resultWaterExtra = document.getElementById("result-water-extra");
 const onboardingBanner = document.getElementById("onboarding-banner");
 const onboardingBannerContent = document.getElementById("onboarding-banner-content");
 
@@ -370,9 +376,16 @@ function updateResult() {
   const kcal100g = foodEnergyKcalPer100g(food);
   const grams = feedingGramsPerDay(dailyKcal, kcal100g);
 
+  const waterNeedMl = dailyWaterNeedMl(cat.gewicht);
+  const waterFromFoodMl = foodWaterGramsPerDay(grams, food.feuchte);
+  const waterExtraMl = Math.max(0, waterNeedMl - waterFromFoodMl);
+
   resultKcal.textContent = `${Math.round(dailyKcal)} kcal`;
   resultKcal100.textContent = `${kcal100g.toFixed(1)} kcal/100g`;
   resultGrams.textContent = `${Math.round(grams)} g`;
+  resultWaterNeed.textContent = `${Math.round(waterNeedMl)} ml`;
+  resultWaterFood.textContent = `${Math.round(waterFromFoodMl)} ml`;
+  resultWaterExtra.textContent = `${Math.round(waterExtraMl)} ml`;
 
   resultPanel.hidden = false;
   resultEmpty.hidden = true;
