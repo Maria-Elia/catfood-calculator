@@ -62,6 +62,16 @@ button {
   cursor: pointer;
 }
 
+/* Without this, mobile browsers can take a tap as the start of a scroll
+   gesture and cancel the click if the finger moves even a pixel or two -
+   shows the :active highlight but never fires click/submit. */
+button,
+a,
+select,
+input {
+  touch-action: manipulation;
+}
+
 /* ---- hero ---- */
 .hero {
   position: relative;

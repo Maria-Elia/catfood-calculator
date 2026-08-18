@@ -28,6 +28,20 @@ test('cat store add() persists a cat with a generated id and timestamp', () => {
   assert.equal(store.list().length, 1);
 });
 
+test('cat store add() falls back to crypto.getRandomValues when randomUUID is unavailable', () => {
+  // Mirrors a real device on plain HTTP over a LAN IP (not localhost/HTTPS),
+  // where crypto.randomUUID is undefined but getRandomValues still works.
+  const original = crypto.randomUUID;
+  crypto.randomUUID = undefined;
+  try {
+    const store = createCatStore(createMemoryBackend());
+    const cat = store.add({ name: 'Mia', gewicht: 4, status: 'erwachsen_kastriert' });
+    assert.match(cat.id, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+  } finally {
+    crypto.randomUUID = original;
+  }
+});
+
 test('cat store update() changes an existing cat', () => {
   const store = createCatStore(createMemoryBackend());
   const cat = store.add({ name: 'Mia', gewicht: 4, status: 'erwachsen_kastriert' });

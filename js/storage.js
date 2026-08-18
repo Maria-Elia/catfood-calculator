@@ -2,9 +2,9 @@
 // is injected so tests can swap in an in-memory mock instead of a real
 // browser localStorage.
 
-const CATS_KEY = 'catfood_cats';
-const FOODS_KEY = 'catfood_foods';
-const MEALS_KEY = 'catfood_meals';
+const CATS_KEY = "catfood_cats";
+const FOODS_KEY = "catfood_foods";
+const MEALS_KEY = "catfood_meals";
 
 function readAll(backend, key) {
   const raw = backend.getItem(key);
@@ -16,6 +16,18 @@ function writeAll(backend, key, items) {
   backend.setItem(key, JSON.stringify(items));
 }
 
+// crypto.randomUUID() only works in secure contexts (HTTPS or localhost)
+function generateId() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = [...bytes].map((byte) => byte.toString(16).padStart(2, "0"));
+  return `${hex.slice(0, 4).join("")}-${hex.slice(4, 6).join("")}-${hex.slice(6, 8).join("")}-${hex.slice(8, 10).join("")}-${hex.slice(10, 16).join("")}`;
+}
+
 function createStore(backend, key) {
   return {
     list() {
@@ -25,7 +37,7 @@ function createStore(backend, key) {
       const items = readAll(backend, key);
       const withId = {
         ...entry,
-        id: crypto.randomUUID(),
+        id: generateId(),
         erstellt: new Date().toISOString(),
       };
       items.push(withId);
@@ -75,7 +87,7 @@ export function createMealStore(backend) {
     add(catId, entry) {
       const meals = readMeals(backend);
       const catMeals = meals[catId] || [];
-      const withId = { ...entry, id: crypto.randomUUID() };
+      const withId = { ...entry, id: generateId() };
       meals[catId] = [...catMeals, withId];
       writeMeals(backend, meals);
       return withId;
