@@ -4,10 +4,14 @@ import {
   rerKcal,
   dailyEnergyNeedKcal,
   STATUS_FACTORS,
+  FOOD_TYPE_LABELS,
   foodEnergyKcalPer100g,
   feedingGramsPerDay,
   dailyWaterNeedMl,
   foodWaterGramsPerDay,
+  mealTotalKcal,
+  mealTotalWaterMl,
+  mealStatus,
 } from '../js/calc.js';
 
 test('rerKcal computes resting energy requirement for a 4kg cat', () => {
@@ -99,4 +103,86 @@ test('foodWaterGramsPerDay rejects invalid inputs', () => {
   assert.throws(() => foodWaterGramsPerDay(0, 80), /Futtermenge/);
   assert.throws(() => foodWaterGramsPerDay(250, -1), /Feuchte/);
   assert.throws(() => foodWaterGramsPerDay(250, 101), /Feuchte/);
+});
+
+test('FOOD_TYPE_LABELS includes trocken, nass, and leckerli', () => {
+  assert.equal(FOOD_TYPE_LABELS.trocken, 'Trockenfutter');
+  assert.equal(FOOD_TYPE_LABELS.nass, 'Nassfutter');
+  assert.equal(FOOD_TYPE_LABELS.leckerli, 'Leckerli');
+});
+
+test('mealTotalKcal sums kcal contributions across components', () => {
+  const foods = [
+    { id: 'a', feuchte: 80, protein: 10, fett: 6, rohfaser: 0.5, rohasche: 2 },
+    { id: 'b', feuchte: 8, protein: 30, fett: 15, rohfaser: 2, rohasche: 7 },
+  ];
+  const kcalB = foodEnergyKcalPer100g(foods[1]);
+  const components = [
+    { foodId: 'a', grams: 200 },
+    { foodId: 'b', grams: 50 },
+  ];
+  const expected = 2 * 95.412 + (50 / 100) * kcalB;
+  const result = mealTotalKcal(components, foods);
+  assert.ok(Math.abs(result - expected) < 0.01, `expected ~${expected}, got ${result}`);
+});
+
+test('mealTotalKcal skips components referencing a missing food', () => {
+  const foods = [{ id: 'a', feuchte: 80, protein: 10, fett: 6, rohfaser: 0.5, rohasche: 2 }];
+  const components = [
+    { foodId: 'a', grams: 100 },
+    { foodId: 'missing', grams: 999 },
+  ];
+  const result = mealTotalKcal(components, foods);
+  assert.ok(Math.abs(result - 95.412) < 0.01, `expected ~95.41, got ${result}`);
+});
+
+test('mealTotalWaterMl sums moisture-derived water across components', () => {
+  const foods = [
+    { id: 'a', feuchte: 80, protein: 10, fett: 6, rohfaser: 0.5, rohasche: 2 },
+    { id: 'b', feuchte: 10, protein: 30, fett: 15, rohfaser: 2, rohasche: 7 },
+  ];
+  const components = [
+    { foodId: 'a', grams: 250 },
+    { foodId: 'b', grams: 100 },
+  ];
+  assert.equal(mealTotalWaterMl(components, foods), 210);
+});
+
+test('mealTotalWaterMl skips components referencing a missing food', () => {
+  const foods = [{ id: 'a', feuchte: 80, protein: 10, fett: 6, rohfaser: 0.5, rohasche: 2 }];
+  const components = [
+    { foodId: 'a', grams: 250 },
+    { foodId: 'missing', grams: 999 },
+  ];
+  assert.equal(mealTotalWaterMl(components, foods), 200);
+});
+
+test('mealStatus returns gruen within 5% of daily need', () => {
+  const over = mealStatus(210, 200);
+  assert.equal(over.status, 'gruen');
+  assert.ok(Math.abs(over.deviationPercent - 5) < 0.001);
+
+  const under = mealStatus(190, 200);
+  assert.equal(under.status, 'gruen');
+});
+
+test('mealStatus returns gelb between 5% and 10% deviation', () => {
+  const over = mealStatus(220, 200);
+  assert.equal(over.status, 'gelb');
+
+  const under = mealStatus(180, 200);
+  assert.equal(under.status, 'gelb');
+});
+
+test('mealStatus returns rot beyond 10% deviation', () => {
+  const over = mealStatus(230, 200);
+  assert.equal(over.status, 'rot');
+
+  const under = mealStatus(170, 200);
+  assert.equal(under.status, 'rot');
+});
+
+test('mealStatus rejects a non-positive daily need', () => {
+  assert.throws(() => mealStatus(100, 0), /Tagesbedarf/);
+  assert.throws(() => mealStatus(100, -5), /Tagesbedarf/);
 });

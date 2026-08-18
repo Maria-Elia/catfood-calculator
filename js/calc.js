@@ -18,6 +18,12 @@ export const STATUS_LABELS = {
   uebergewichtig_diaet: "Übergewichtig / Diät",
 };
 
+export const FOOD_TYPE_LABELS = {
+  trocken: "Trockenfutter",
+  nass: "Nassfutter",
+  leckerli: "Leckerli",
+};
+
 export function rerKcal(weightKg) {
   if (typeof weightKg !== "number" || !(weightKg > 0)) {
     throw new Error("Gewicht muss eine Zahl größer als 0 sein.");
@@ -93,4 +99,43 @@ export function foodWaterGramsPerDay(feedingGrams, feuchtePercent) {
     throw new Error("Feuchte muss eine Zahl zwischen 0 und 100 sein.");
   }
   return (feedingGrams * feuchtePercent) / 100;
+}
+
+// Meal planner: combine multiple food components into one daily total and
+// compare it against the cat's daily energy need.
+
+export function mealTotalKcal(components, foods) {
+  return components.reduce((total, component) => {
+    const food = foods.find((item) => item.id === component.foodId);
+    if (!food) return total; // referenced food was deleted, skip silently
+    return total + (component.grams / 100) * foodEnergyKcalPer100g(food);
+  }, 0);
+}
+
+export function mealTotalWaterMl(components, foods) {
+  return components.reduce((total, component) => {
+    const food = foods.find((item) => item.id === component.foodId);
+    if (!food) return total;
+    return total + foodWaterGramsPerDay(component.grams, food.feuchte);
+  }, 0);
+}
+
+export function mealStatus(totalKcal, dailyKcalNeed) {
+  if (typeof dailyKcalNeed !== "number" || dailyKcalNeed <= 0) {
+    throw new Error("Tagesbedarf muss größer als 0 sein.");
+  }
+
+  const deviationPercent = ((totalKcal - dailyKcalNeed) / dailyKcalNeed) * 100;
+  const absDeviation = Math.abs(deviationPercent);
+
+  let status;
+  if (absDeviation <= 5) {
+    status = "gruen";
+  } else if (absDeviation <= 10) {
+    status = "gelb";
+  } else {
+    status = "rot";
+  }
+
+  return { status, deviationPercent };
 }
