@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Katzenfutter-Rechner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Poppins:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+
+<body>
+  <header class="hero">
+    <svg class="coatlines" viewBox="0 0 800 400" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M40,80 Q220,20 360,110 T760,80" class="coatlines__path coatlines__path--teal" />
+      <path d="M20,300 Q260,370 440,290 T780,320" class="coatlines__path coatlines__path--pink" />
+    </svg>
+    <div class="hero__inner">
+      <p class="hero__kicker">Katzenfutter-Rechner</p>
+      <h1 class="hero__title">Wie viel Futter braucht deine Katze wirklich?</h1>
+      <p class="hero__lede">
+        Gewicht und Kastrationsstatus deiner Katze, dazu die Nährwerte vom
+        Futter-Etikett &mdash; der Rechner sagt dir die Tagesmenge in Gramm.
+      </p>
+    </div>
+  </header>
+
+  <main>
+    <section id="rechner" class="calculator">
+      <h2 class="section-title">Rechner</h2>
+      <div class="calculator__grid">
+        <div class="calculator__picker">
+          <label for="cat-select">Katze</label>
+          <select id="cat-select">
+            <option value="">Katze wählen…</option>
+          </select>
+        </div>
+        <div class="calculator__picker">
+          <label for="food-select">Futter</label>
+          <select id="food-select">
+            <option value="">Futter wählen…</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="result-panel" class="result-panel" hidden>
+        <div class="result-panel__row">
+          <span class="result-panel__label">Tagesbedarf</span>
+          <span id="result-kcal" class="result-panel__value"></span>
+        </div>
+        <div class="result-panel__row">
+          <span class="result-panel__label">Futter enthält</span>
+          <span id="result-kcal100" class="result-panel__value"></span>
+        </div>
+        <div class="result-panel__row result-panel__row--accent">
+          <span class="result-panel__label">Tagesmenge</span>
+          <span id="result-grams" class="result-panel__value result-panel__value--accent"></span>
+        </div>
+      </div>
+      <p id="result-empty" class="empty-state">
+        Wähl eine Katze und ein Futter aus, um die Tagesmenge zu berechnen.
+      </p>
+    </section>
+
+    <section id="katzen" class="profiles">
+      <h2 class="section-title">Meine Katzen</h2>
+      <form id="cat-form" class="profile-form" novalidate>
+        <input type="hidden" id="cat-id" value="" />
+        <div class="profile-form__row">
+          <label for="cat-name">Name</label>
+          <input type="text" id="cat-name" required />
+        </div>
+        <div class="profile-form__row">
+          <label for="cat-weight">Gewicht (kg)</label>
+          <input type="number" id="cat-weight" step="0.1" min="0.1" required />
+        </div>
+        <div class="profile-form__row">
+          <label for="cat-status">Status</label>
+          <select id="cat-status" required>
+            <option value="kitten_bis_4_monate">Kitten bis 4 Monate</option>
+            <option value="kitten_4_bis_12_monate">Kitten 4–12 Monate</option>
+            <option value="erwachsen_unkastriert">Erwachsen, unkastriert</option>
+            <option value="erwachsen_kastriert" selected>Erwachsen, kastriert</option>
+            <option value="uebergewichtig_diaet">Übergewichtig / Diät</option>
+          </select>
+        </div>
+        <p id="cat-form-error" class="form-error" hidden></p>
+        <button type="submit" class="btn-pill">Katze speichern</button>
+      </form>
+      <ul id="cat-list" class="profile-list"></ul>
+      <p id="cat-empty" class="empty-state">Noch keine Katze gespeichert.</p>
+    </section>
+
+    <section id="futter" class="profiles">
+      <h2 class="section-title">Mein Futter</h2>
+      <form id="food-form" class="profile-form" novalidate>
+        <input type="hidden" id="food-id" value="" />
+        <div class="profile-form__row">
+          <label for="food-name">Name</label>
+          <input type="text" id="food-name" required />
+        </div>
+        <div class="profile-form__row">
+          <label for="food-type">Typ</label>
+          <select id="food-type" required>
+            <option value="trocken">Trockenfutter</option>
+            <option value="nass" selected>Nassfutter</option>
+          </select>
+        </div>
+        <div class="profile-form__row-group">
+          <div class="profile-form__row">
+            <label for="food-feuchte">Feuchte (%)</label>
+            <input type="number" id="food-feuchte" step="0.1" min="0" max="100" required />
+          </div>
+          <div class="profile-form__row">
+            <label for="food-protein">Protein (%)</label>
+            <input type="number" id="food-protein" step="0.1" min="0" max="100" required />
+          </div>
+          <div class="profile-form__row">
+            <label for="food-fett">Fett (%)</label>
+            <input type="number" id="food-fett" step="0.1" min="0" max="100" required />
+          </div>
+          <div class="profile-form__row">
+            <label for="food-rohfaser">Rohfaser (%)</label>
+            <input type="number" id="food-rohfaser" step="0.1" min="0" max="100" required />
+          </div>
+          <div class="profile-form__row">
+            <label for="food-rohasche">Rohasche (%)</label>
+            <input type="number" id="food-rohasche" step="0.1" min="0" max="100" required />
+          </div>
+        </div>
+        <p id="food-form-error" class="form-error" hidden></p>
+        <button type="submit" class="btn-pill">Futter speichern</button>
+      </form>
+      <ul id="food-list" class="profile-list"></ul>
+      <p id="food-empty" class="empty-state">Noch kein Futter gespeichert.</p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Katzenfutter-Rechner</p>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+
+</html>
