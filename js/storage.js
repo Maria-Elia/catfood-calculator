@@ -68,13 +68,34 @@ function writeMeals(backend, meals) {
 
 export function createMealStore(backend) {
   return {
-    getComponents(catId) {
+    list(catId) {
       const meals = readMeals(backend);
       return meals[catId] || [];
     },
-    setComponents(catId, components) {
+    add(catId, entry) {
       const meals = readMeals(backend);
-      meals[catId] = components;
+      const catMeals = meals[catId] || [];
+      const withId = { ...entry, id: crypto.randomUUID() };
+      meals[catId] = [...catMeals, withId];
+      writeMeals(backend, meals);
+      return withId;
+    },
+    update(catId, mealId, changes) {
+      const meals = readMeals(backend);
+      const catMeals = meals[catId] || [];
+      const index = catMeals.findIndex((meal) => meal.id === mealId);
+      if (index === -1) {
+        throw new Error(`Keine Mahlzeit mit id ${mealId} gefunden.`);
+      }
+      catMeals[index] = { ...catMeals[index], ...changes };
+      meals[catId] = catMeals;
+      writeMeals(backend, meals);
+      return catMeals[index];
+    },
+    remove(catId, mealId) {
+      const meals = readMeals(backend);
+      const catMeals = meals[catId] || [];
+      meals[catId] = catMeals.filter((meal) => meal.id !== mealId);
       writeMeals(backend, meals);
     },
   };

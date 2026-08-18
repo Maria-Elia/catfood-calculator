@@ -72,30 +72,55 @@ test('food store add() persists a food profile', () => {
   assert.equal(store.list().length, 1);
 });
 
-test('meal store returns an empty list for a cat with no saved meal', () => {
+test('meal store list() returns an empty array for a cat with no saved meals', () => {
   const store = createMealStore(createMemoryBackend());
-  assert.deepEqual(store.getComponents('cat-1'), []);
+  assert.deepEqual(store.list('cat-1'), []);
 });
 
-test('meal store setComponents() persists components scoped to a cat', () => {
+test('meal store add() persists a named meal with a generated id, scoped to a cat', () => {
   const store = createMealStore(createMemoryBackend());
-  store.setComponents('cat-1', [{ foodId: 'food-a', grams: 100 }]);
-  assert.deepEqual(store.getComponents('cat-1'), [{ foodId: 'food-a', grams: 100 }]);
+  const meal = store.add('cat-1', { name: 'Frühstück', components: [{ foodId: 'food-a', grams: 100 }] });
+  assert.equal(meal.name, 'Frühstück');
+  assert.ok(meal.id, 'expected a generated id');
+  assert.deepEqual(store.list('cat-1'), [meal]);
 });
 
-test('meal store keeps components separate per cat', () => {
+test('meal store keeps meals separate per cat', () => {
   const store = createMealStore(createMemoryBackend());
-  store.setComponents('cat-1', [{ foodId: 'food-a', grams: 100 }]);
-  store.setComponents('cat-2', [{ foodId: 'food-b', grams: 50 }]);
-  assert.deepEqual(store.getComponents('cat-1'), [{ foodId: 'food-a', grams: 100 }]);
-  assert.deepEqual(store.getComponents('cat-2'), [{ foodId: 'food-b', grams: 50 }]);
+  store.add('cat-1', { name: 'A', components: [] });
+  store.add('cat-2', { name: 'B', components: [] });
+  assert.equal(store.list('cat-1').length, 1);
+  assert.equal(store.list('cat-2').length, 1);
+  assert.equal(store.list('cat-1')[0].name, 'A');
+  assert.equal(store.list('cat-2')[0].name, 'B');
 });
 
-test("meal store setComponents() overwrites a cat's previous components", () => {
+test('meal store add() appends without overwriting existing meals for the same cat', () => {
   const store = createMealStore(createMemoryBackend());
-  store.setComponents('cat-1', [{ foodId: 'food-a', grams: 100 }]);
-  store.setComponents('cat-1', [{ foodId: 'food-b', grams: 50 }]);
-  assert.deepEqual(store.getComponents('cat-1'), [{ foodId: 'food-b', grams: 50 }]);
+  store.add('cat-1', { name: 'Frühstück', components: [] });
+  store.add('cat-1', { name: 'Abendessen', components: [] });
+  const names = store.list('cat-1').map((meal) => meal.name);
+  assert.deepEqual(names, ['Frühstück', 'Abendessen']);
+});
+
+test('meal store update() changes an existing meal', () => {
+  const store = createMealStore(createMemoryBackend());
+  const meal = store.add('cat-1', { name: 'Frühstück', components: [] });
+  const updated = store.update('cat-1', meal.id, { name: 'Abendessen' });
+  assert.equal(updated.name, 'Abendessen');
+  assert.equal(store.list('cat-1')[0].name, 'Abendessen');
+});
+
+test('meal store update() throws for an unknown meal id', () => {
+  const store = createMealStore(createMemoryBackend());
+  assert.throws(() => store.update('cat-1', 'nope', { name: 'x' }), /Keine Mahlzeit/);
+});
+
+test('meal store remove() deletes a meal', () => {
+  const store = createMealStore(createMemoryBackend());
+  const meal = store.add('cat-1', { name: 'Frühstück', components: [] });
+  store.remove('cat-1', meal.id);
+  assert.deepEqual(store.list('cat-1'), []);
 });
 
 test('meal store persists independently from the cat/food stores on the same backend', () => {
@@ -103,6 +128,6 @@ test('meal store persists independently from the cat/food stores on the same bac
   const cats = createCatStore(backend);
   const meals = createMealStore(backend);
   cats.add({ name: 'Mia', gewicht: 4, status: 'erwachsen_kastriert' });
-  assert.deepEqual(meals.getComponents('anything'), []);
+  assert.deepEqual(meals.list('anything'), []);
   assert.equal(cats.list().length, 1);
 });
