@@ -1,4 +1,6 @@
 // builds a per-cat meal from multiple saved food components and checks the total against the cat's daily energy need.
+// The component table works on an in-memory draft (draftComponents, editingMealId) until the user explicitly
+// saves it as a named meal via mealStore.
 
 import { createMealStore } from "./storage.js";
 import {
@@ -20,6 +22,9 @@ const STATUS_BADGE_LABELS = {
 export function initMealPlanner({ catStore, foodStore }) {
   const mealStore = createMealStore(window.localStorage);
 
+  let draftComponents = [];
+  let editingMealId = null;
+
   const catSelect = document.getElementById("meal-cat-select");
   const catHint = document.getElementById("meal-select-cat-hint");
   const plannerBody = document.getElementById("meal-planner-body");
@@ -36,6 +41,18 @@ export function initMealPlanner({ catStore, foodStore }) {
   const summaryWaterNeed = document.getElementById("meal-summary-water-need");
   const summaryWaterFood = document.getElementById("meal-summary-water-food");
   const summaryWaterExtra = document.getElementById("meal-summary-water-extra");
+  const nameInput = document.getElementById("meal-name-input");
+  const saveBtn = document.getElementById("meal-save-btn");
+  const newBtn = document.getElementById("meal-new-btn");
+  const saveError = document.getElementById("meal-save-error");
+  const savedList = document.getElementById("meal-saved-list");
+  const savedEmpty = document.getElementById("meal-saved-empty");
+
+  function resetDraft() {
+    draftComponents = [];
+    editingMealId = null;
+    nameInput.value = "";
+  }
 
   function refreshCatOptions() {
     const selected = catSelect.value;
@@ -61,35 +78,17 @@ export function initMealPlanner({ catStore, foodStore }) {
     foodSelect.value = foodStore.list().some((food) => food.id === selected) ? selected : "";
   }
 
-  function renderComponents() {
-    const catId = catSelect.value;
-
-    if (!catId) {
-      plannerBody.hidden = true;
-      catHint.hidden = false;
-      return;
-    }
-
-    plannerBody.hidden = false;
-    catHint.hidden = true;
-
-    const cat = catStore.list().find((item) => item.id === catId);
-    const foods = foodStore.list();
-    const stored = mealStore.getComponents(catId);
-
-    // A component's food may have been deleted since it was saved; drop it
-    // and persist the cleanup so the table never shows a broken reference.
-    const components = stored.filter((component) =>
+  function renderDraft(cat, foods) {
+    // A component's food may have been deleted since it was added to the
+    // draft; drop it since the draft is unsaved, so there's nothing to persist.
+    draftComponents = draftComponents.filter((component) =>
       foods.some((food) => food.id === component.foodId),
     );
-    if (components.length !== stored.length) {
-      mealStore.setComponents(catId, components);
-    }
 
     componentList.innerHTML = "";
-    emptyState.hidden = components.length > 0;
+    emptyState.hidden = draftComponents.length > 0;
 
-    for (const component of components) {
+    for (const component of draftComponents) {
       const food = foods.find((item) => item.id === component.foodId);
       const kcal = (component.grams / 100) * foodEnergyKcalPer100g(food);
 
@@ -105,16 +104,16 @@ export function initMealPlanner({ catStore, foodStore }) {
       componentList.appendChild(row);
     }
 
-    if (components.length === 0) {
+    if (draftComponents.length === 0) {
       summary.hidden = true;
       return;
     }
 
     summary.hidden = false;
-    const totalKcal = mealTotalKcal(components, foods);
+    const totalKcal = mealTotalKcal(draftComponents, foods);
     const dailyKcal = dailyEnergyNeedKcal(cat.gewicht, cat.status);
     const { status, deviationPercent } = mealStatus(totalKcal, dailyKcal);
-    const totalWaterMl = mealTotalWaterMl(components, foods);
+    const totalWaterMl = mealTotalWaterMl(draftComponents, foods);
     const waterNeedMl = dailyWaterNeedMl(cat.gewicht);
     const waterExtraMl = Math.max(0, waterNeedMl - totalWaterMl);
 
@@ -127,13 +126,70 @@ export function initMealPlanner({ catStore, foodStore }) {
     summaryWaterExtra.textContent = `${Math.round(waterExtraMl)} ml`;
   }
 
+  function renderSavedMeals(catId, foods) {
+    // A saved meal's food may have been deleted; drop that component and
+    // persist the cleanup so the card never shows a broken reference.
+    const meals = mealStore.list(catId).map((meal) => {
+      const components = meal.components.filter((component) =>
+        foods.some((food) => food.id === component.foodId),
+      );
+      if (components.length === meal.components.length) return meal;
+      mealStore.update(catId, meal.id, { components });
+      return { ...meal, components };
+    });
+
+    savedList.innerHTML = "";
+    savedEmpty.hidden = meals.length > 0;
+
+    for (const meal of meals) {
+      const totalKcal = mealTotalKcal(meal.components, foods);
+
+      const li = document.createElement("li");
+      li.className = "profile-card";
+      li.dataset.id = meal.id;
+      li.innerHTML = `
+        <div class="profile-card__main">
+          <span class="profile-card__name">${meal.name}</span>
+          <span class="profile-card__kcal">${Math.round(totalKcal)} kcal</span>
+        </div>
+        <div class="profile-card__actions">
+          <button type="button" class="btn-text" data-action="load">Laden</button>
+          <button type="button" class="btn-text" data-action="delete">Löschen</button>
+        </div>
+      `;
+      savedList.appendChild(li);
+    }
+  }
+
+  function render() {
+    const catId = catSelect.value;
+
+    if (!catId) {
+      plannerBody.hidden = true;
+      catHint.hidden = false;
+      return;
+    }
+
+    plannerBody.hidden = false;
+    catHint.hidden = true;
+
+    const cat = catStore.list().find((item) => item.id === catId);
+    const foods = foodStore.list();
+
+    renderDraft(cat, foods);
+    renderSavedMeals(catId, foods);
+  }
+
   function refresh() {
     refreshCatOptions();
     refreshFoodOptions();
-    renderComponents();
+    render();
   }
 
-  catSelect.addEventListener("change", renderComponents);
+  catSelect.addEventListener("change", () => {
+    resetDraft();
+    render();
+  });
 
   addBtn.addEventListener("click", () => {
     addError.hidden = true;
@@ -156,19 +212,17 @@ export function initMealPlanner({ catStore, foodStore }) {
       addError.hidden = false;
       return;
     }
-
-    const components = mealStore.getComponents(catId);
-    if (components.some((component) => component.foodId === foodId)) {
+    if (draftComponents.some((component) => component.foodId === foodId)) {
       addError.textContent =
         "Dieses Futter ist schon in der Mahlzeit. Passe die Menge direkt in der Tabelle an.";
       addError.hidden = false;
       return;
     }
 
-    mealStore.setComponents(catId, [...components, { foodId, grams }]);
+    draftComponents = [...draftComponents, { foodId, grams }];
     foodSelect.value = "";
     gramsInput.value = "";
-    renderComponents();
+    render();
   });
 
   componentList.addEventListener("change", (event) => {
@@ -177,45 +231,93 @@ export function initMealPlanner({ catStore, foodStore }) {
 
     const grams = Number(input.value);
     if (!(grams > 0)) {
-      renderComponents(); // reset the input back to the last valid value
+      render(); // reset the input back to the last valid value
       return;
     }
 
-    const catId = catSelect.value;
     const foodId = input.closest("tr").dataset.foodId;
-    const components = mealStore
-      .getComponents(catId)
-      .map((component) => (component.foodId === foodId ? { ...component, grams } : component));
-    mealStore.setComponents(catId, components);
-    renderComponents();
+    draftComponents = draftComponents.map((component) =>
+      component.foodId === foodId ? { ...component, grams } : component,
+    );
+    render();
   });
 
   componentList.addEventListener("click", (event) => {
     const button = event.target.closest('button[data-action="remove"]');
     if (!button) return;
 
-    const catId = catSelect.value;
     const foodId = button.closest("tr").dataset.foodId;
-    const components = mealStore
-      .getComponents(catId)
-      .filter((component) => component.foodId !== foodId);
-    mealStore.setComponents(catId, components);
-    renderComponents();
+    draftComponents = draftComponents.filter((component) => component.foodId !== foodId);
+    render();
+  });
+
+  saveBtn.addEventListener("click", () => {
+    saveError.hidden = true;
+    const catId = catSelect.value;
+    const name = nameInput.value.trim();
+
+    if (!catId) {
+      saveError.textContent = "Wähl zuerst eine Katze aus.";
+      saveError.hidden = false;
+      return;
+    }
+    if (!name) {
+      saveError.textContent = "Name darf nicht leer sein.";
+      saveError.hidden = false;
+      return;
+    }
+    if (draftComponents.length === 0) {
+      saveError.textContent = "Füg mindestens ein Futter hinzu, bevor du speicherst.";
+      saveError.hidden = false;
+      return;
+    }
+
+    if (editingMealId) {
+      mealStore.update(catId, editingMealId, { name, components: draftComponents });
+    } else {
+      const saved = mealStore.add(catId, { name, components: draftComponents });
+      editingMealId = saved.id;
+    }
+    render();
+  });
+
+  newBtn.addEventListener("click", () => {
+    resetDraft();
+    render();
+  });
+
+  savedList.addEventListener("click", (event) => {
+    const button = event.target.closest("button[data-action]");
+    if (!button) return;
+
+    const li = button.closest(".profile-card");
+    const mealId = li.dataset.id;
+    const catId = catSelect.value;
+
+    if (button.dataset.action === "load") {
+      const meal = mealStore.list(catId).find((item) => item.id === mealId);
+      draftComponents = [...meal.components];
+      editingMealId = meal.id;
+      nameInput.value = meal.name;
+      render();
+    }
+
+    if (button.dataset.action === "delete") {
+      mealStore.remove(catId, mealId);
+      if (editingMealId === mealId) {
+        resetDraft();
+      }
+      render();
+    }
   });
 
   function useAsMealBase(catId, foodId, grams) {
-    const existing = mealStore.getComponents(catId);
-    if (existing.length > 0) {
-      const confirmed = window.confirm(
-        "Für diese Katze ist schon eine Mahlzeit gespeichert. Soll sie durch dieses Ergebnis ersetzt werden?",
-      );
-      if (!confirmed) return;
-    }
-
-    mealStore.setComponents(catId, [{ foodId, grams }]);
     refreshCatOptions();
     catSelect.value = catId;
-    renderComponents();
+    draftComponents = [{ foodId, grams }];
+    editingMealId = null;
+    nameInput.value = "";
+    render();
     document.getElementById("mahlzeiten").scrollIntoView({ behavior: "smooth" });
   }
 
