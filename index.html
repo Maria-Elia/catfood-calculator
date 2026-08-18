@@ -75,6 +75,7 @@
           <span class="result-panel__label">Noch extra nötig</span>
           <span id="result-water-extra" class="result-panel__value result-panel__value--water-accent"></span>
         </div>
+        <button type="button" id="use-as-meal-btn" class="btn-pill">Als Mahlzeit weiterbearbeiten</button>
       </div>
       <div id="result-empty" class="result-preview">
         <div class="result-preview__rows" aria-hidden="true">
@@ -108,6 +109,80 @@
           <img class="result-preview__hint-icon" src="assets/svg/cat-food.svg" alt="" aria-hidden="true" />
           Wähl oben eine Katze und ein Futter aus, um deine Tagesmenge zu berechnen.
         </p>
+      </div>
+    </section>
+
+    <section id="mahlzeiten" class="calculator meal-planner">
+      <h2 class="section-title">
+        <img class="section-title__icon" src="assets/svg/cat-bowl.svg" alt="" aria-hidden="true" />
+        Mahlzeiten-Planer
+      </h2>
+
+      <div class="calculator__picker">
+        <label for="meal-cat-select">Katze</label>
+        <select id="meal-cat-select">
+          <option value="">Katze wählen…</option>
+        </select>
+      </div>
+
+      <p id="meal-select-cat-hint" class="empty-state">Wähl zuerst eine Katze aus, um ihre Mahlzeit zusammenzustellen.</p>
+
+      <div id="meal-planner-body" hidden>
+        <div class="meal-planner__add-row">
+          <div class="meal-planner__add-field">
+            <label for="meal-food-select">Futter</label>
+            <select id="meal-food-select">
+              <option value="">Futter wählen…</option>
+            </select>
+          </div>
+          <div class="meal-planner__add-field meal-planner__add-field--grams">
+            <label for="meal-grams-input">Gramm</label>
+            <input type="number" id="meal-grams-input" step="1" min="1" />
+          </div>
+          <button type="button" id="meal-add-btn" class="btn-pill">Hinzufügen</button>
+        </div>
+        <p id="meal-add-error" class="form-error" hidden></p>
+
+        <table class="meal-planner__table">
+          <thead>
+            <tr>
+              <th>Futter</th>
+              <th>Typ</th>
+              <th>Gramm</th>
+              <th>kcal</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="meal-component-list"></tbody>
+        </table>
+        <p id="meal-empty" class="empty-state">Noch keine Mahlzeit zusammengestellt.</p>
+
+        <div id="meal-summary" class="meal-summary" hidden>
+          <div class="meal-summary__row">
+            <span class="meal-summary__label">Gesamt kcal</span>
+            <span id="meal-summary-total" class="meal-summary__value"></span>
+          </div>
+          <div class="meal-summary__row">
+            <span class="meal-summary__label">Tagesbedarf</span>
+            <span id="meal-summary-need" class="meal-summary__value"></span>
+          </div>
+          <div class="meal-summary__row">
+            <span id="meal-summary-badge" class="meal-summary__badge"></span>
+          </div>
+          <div class="meal-planner__divider"></div>
+          <div class="meal-summary__row">
+            <span class="meal-summary__label">Wasserbedarf</span>
+            <span id="meal-summary-water-need" class="meal-summary__value"></span>
+          </div>
+          <div class="meal-summary__row">
+            <span class="meal-summary__label">Wasser aus Mahlzeit</span>
+            <span id="meal-summary-water-food" class="meal-summary__value"></span>
+          </div>
+          <div class="meal-summary__row">
+            <span class="meal-summary__label">Noch extra nötig</span>
+            <span id="meal-summary-water-extra" class="meal-summary__value"></span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -159,6 +234,7 @@
           <select id="food-type" required>
             <option value="trocken">Trockenfutter</option>
             <option value="nass" selected>Nassfutter</option>
+            <option value="leckerli">Leckerli</option>
           </select>
         </div>
         <div class="profile-form__row-group">
