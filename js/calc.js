@@ -30,3 +30,30 @@ export function dailyEnergyNeedKcal(weightKg, status) {
   }
   return rerKcal(weightKg) * factor;
 }
+
+export function foodEnergyKcalPer100g({ feuchte, protein, fett, rohfaser, rohasche }) {
+  const inputs = { feuchte, protein, fett, rohfaser, rohasche };
+  for (const [key, value] of Object.entries(inputs)) {
+    if (typeof value !== "number" || value < 0 || value > 100) {
+      throw new Error(`${key} muss eine Zahl zwischen 0 und 100 sein.`);
+    }
+  }
+
+  const ts = 100 - feuchte;
+  if (ts <= 0) {
+    throw new Error("Feuchte muss unter 100% liegen.");
+  }
+
+  const nfe = ts - protein - rohasche - rohfaser - fett;
+  if (nfe < 0) {
+    throw new Error("Nährwerte summieren sich auf mehr als die Trockensubstanz.");
+  }
+
+  const rfaInTs = (100 / ts) * rohfaser;
+  const ge = 0.024 * protein + 0.038 * fett + 0.017 * rohfaser + 0.017 * nfe;
+  const sv = 87.9 - 0.88 * rfaInTs;
+  const de = (ge * sv) / 100;
+  const me = de - 0.0031 * protein;
+
+  return me * 239;
+}

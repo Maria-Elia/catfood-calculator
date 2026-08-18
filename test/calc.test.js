@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { rerKcal, dailyEnergyNeedKcal, STATUS_FACTORS } from '../js/calc.js';
+import { rerKcal, dailyEnergyNeedKcal, STATUS_FACTORS, foodEnergyKcalPer100g } from '../js/calc.js';
 
 test('rerKcal computes resting energy requirement for a 4kg cat', () => {
   const result = rerKcal(4);
@@ -27,4 +27,30 @@ test('dailyEnergyNeedKcal applies the intact adult factor and differs from neute
 
 test('dailyEnergyNeedKcal rejects an unknown status', () => {
   assert.throws(() => dailyEnergyNeedKcal(4, 'nicht_vorhanden'), /Unbekannter Status/);
+});
+
+test('foodEnergyKcalPer100g computes ME for a typical wet food', () => {
+  const result = foodEnergyKcalPer100g({ feuchte: 80, protein: 10, fett: 6, rohfaser: 0.5, rohasche: 2 });
+  assert.ok(Math.abs(result - 95.412) < 0.01, `expected ~95.41, got ${result}`);
+});
+
+test('foodEnergyKcalPer100g rejects values that do not add up (negative NfE)', () => {
+  assert.throws(
+    () => foodEnergyKcalPer100g({ feuchte: 10, protein: 40, fett: 40, rohfaser: 10, rohasche: 10 }),
+    /Nährwerte/
+  );
+});
+
+test('foodEnergyKcalPer100g rejects out-of-range percentages', () => {
+  assert.throws(
+    () => foodEnergyKcalPer100g({ feuchte: 80, protein: -1, fett: 6, rohfaser: 0.5, rohasche: 2 }),
+    /protein/
+  );
+});
+
+test('foodEnergyKcalPer100g rejects feuchte at or above 100', () => {
+  assert.throws(
+    () => foodEnergyKcalPer100g({ feuchte: 100, protein: 0, fett: 0, rohfaser: 0, rohasche: 0 }),
+    /Feuchte/
+  );
 });
