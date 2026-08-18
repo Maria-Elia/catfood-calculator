@@ -57,3 +57,13 @@ export function foodEnergyKcalPer100g({ feuchte, protein, fett, rohfaser, rohasc
 
   return me * 239;
 }
+
+export function feedingGramsPerDay(dailyKcalNeed, kcalPer100g) {
+  if (typeof dailyKcalNeed !== "number" || dailyKcalNeed <= 0) {
+    throw new Error("Tagesbedarf muss größer als 0 sein.");
+  }
+  if (typeof kcalPer100g !== "number" || kcalPer100g <= 0) {
+    throw new Error("Energiegehalt des Futters muss größer als 0 sein.");
+  }
+  return (dailyKcalNeed / kcalPer100g) * 100;
+}

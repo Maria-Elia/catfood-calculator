@@ -1,6 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { rerKcal, dailyEnergyNeedKcal, STATUS_FACTORS, foodEnergyKcalPer100g } from '../js/calc.js';
+import {
+  rerKcal,
+  dailyEnergyNeedKcal,
+  STATUS_FACTORS,
+  foodEnergyKcalPer100g,
+  feedingGramsPerDay,
+} from '../js/calc.js';
 
 test('rerKcal computes resting energy requirement for a 4kg cat', () => {
   const result = rerKcal(4);
@@ -53,4 +59,21 @@ test('foodEnergyKcalPer100g rejects feuchte at or above 100', () => {
     () => foodEnergyKcalPer100g({ feuchte: 100, protein: 0, fett: 0, rohfaser: 0, rohasche: 0 }),
     /Feuchte/
   );
+});
+
+test('feedingGramsPerDay combines need and food energy into grams', () => {
+  const dailyNeed = dailyEnergyNeedKcal(4, 'erwachsen_kastriert');
+  const kcal100g = foodEnergyKcalPer100g({ feuchte: 80, protein: 10, fett: 6, rohfaser: 0.5, rohasche: 2 });
+  const grams = feedingGramsPerDay(dailyNeed, kcal100g);
+  assert.ok(Math.abs(grams - 249.01) < 0.5, `expected ~249g, got ${grams}`);
+});
+
+test('feedingGramsPerDay rejects zero or negative food energy', () => {
+  assert.throws(() => feedingGramsPerDay(200, 0), /Energiegehalt/);
+  assert.throws(() => feedingGramsPerDay(200, -5), /Energiegehalt/);
+});
+
+test('feedingGramsPerDay rejects zero or negative daily need', () => {
+  assert.throws(() => feedingGramsPerDay(0, 95), /Tagesbedarf/);
+  assert.throws(() => feedingGramsPerDay(-10, 95), /Tagesbedarf/);
 });
