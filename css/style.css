@@ -370,6 +370,24 @@ main {
   color: var(--pink-deep);
 }
 
+/* ---- fun facts ---- */
+.fun-facts__list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+  gap: 1.6rem;
+}
+
+.fun-facts__card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: 1.2rem;
+  padding: 1.8rem 2rem;
+  color: var(--ink);
+  font-size: 1.4rem;
+  line-height: 1.6;
+}
+
 /* ---- footer ---- */
 .site-footer {
   text-align: center;
