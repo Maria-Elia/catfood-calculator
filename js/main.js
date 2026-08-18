@@ -1,5 +1,10 @@
 import { createCatStore, createFoodStore } from "./storage.js";
-import { STATUS_LABELS, dailyEnergyNeedKcal, foodEnergyKcalPer100g } from "./calc.js";
+import {
+  STATUS_LABELS,
+  dailyEnergyNeedKcal,
+  foodEnergyKcalPer100g,
+  feedingGramsPerDay,
+} from "./calc.js";
 
 const catStore = createCatStore(window.localStorage);
 const foodStore = createFoodStore(window.localStorage);
@@ -83,6 +88,8 @@ catForm.addEventListener("submit", (event) => {
 
   resetCatForm();
   renderCatList();
+  renderCatOptions();
+  updateResult();
 });
 
 // One delegated listener, the list is rebuilt on every render
@@ -105,6 +112,8 @@ catList.addEventListener("click", (event) => {
   if (button.dataset.action === "delete") {
     catStore.remove(id);
     renderCatList();
+    renderCatOptions();
+    updateResult();
   }
 });
 
@@ -202,6 +211,8 @@ foodForm.addEventListener("submit", (event) => {
 
   resetFoodForm();
   renderFoodList();
+  renderFoodOptions();
+  updateResult();
 });
 
 foodList.addEventListener("click", (event) => {
@@ -227,7 +238,74 @@ foodList.addEventListener("click", (event) => {
   if (button.dataset.action === "delete") {
     foodStore.remove(id);
     renderFoodList();
+    renderFoodOptions();
+    updateResult();
   }
 });
 
 renderFoodList();
+
+// ---- Calculator ----
+
+const catSelect = document.getElementById("cat-select");
+const foodSelect = document.getElementById("food-select");
+const resultPanel = document.getElementById("result-panel");
+const resultEmpty = document.getElementById("result-empty");
+const resultKcal = document.getElementById("result-kcal");
+const resultKcal100 = document.getElementById("result-kcal100");
+const resultGrams = document.getElementById("result-grams");
+
+function renderCatOptions() {
+  // Preserve the current selection across a rebuild where possible
+  const selected = catSelect.value;
+  catSelect.innerHTML = '<option value="">Katze wählen…</option>';
+  for (const cat of catStore.list()) {
+    const option = document.createElement("option");
+    option.value = cat.id;
+    option.textContent = cat.name;
+    catSelect.appendChild(option);
+  }
+  catSelect.value = catStore.list().some((cat) => cat.id === selected) ? selected : "";
+}
+
+function renderFoodOptions() {
+  const selected = foodSelect.value;
+  foodSelect.innerHTML = '<option value="">Futter wählen…</option>';
+  for (const food of foodStore.list()) {
+    const option = document.createElement("option");
+    option.value = food.id;
+    option.textContent = food.name;
+    foodSelect.appendChild(option);
+  }
+  foodSelect.value = foodStore.list().some((food) => food.id === selected) ? selected : "";
+}
+
+function updateResult() {
+  // Re-read from the store rather than caching the selected objects
+  const cat = catStore.list().find((item) => item.id === catSelect.value);
+  const food = foodStore.list().find((item) => item.id === foodSelect.value);
+
+  if (!cat || !food) {
+    resultPanel.hidden = true;
+    resultEmpty.hidden = false;
+    return;
+  }
+
+  const dailyKcal = dailyEnergyNeedKcal(cat.gewicht, cat.status);
+  const kcal100g = foodEnergyKcalPer100g(food);
+  const grams = feedingGramsPerDay(dailyKcal, kcal100g);
+
+  resultKcal.textContent = `${Math.round(dailyKcal)} kcal`;
+  resultKcal100.textContent = `${kcal100g.toFixed(1)} kcal/100g`;
+  resultGrams.textContent = `${Math.round(grams)} g`;
+
+  resultPanel.hidden = false;
+  resultEmpty.hidden = true;
+}
+
+catSelect.addEventListener("change", updateResult);
+foodSelect.addEventListener("change", updateResult);
+
+renderCatOptions();
+renderFoodOptions();
+updateResult();
