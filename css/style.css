@@ -759,6 +759,13 @@ main {
   line-height: 1.6;
 }
 
+.fun-facts__disclaimer {
+  margin-top: 2rem;
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 1.3rem;
+}
+
 /* ---- footer ---- */
 .site-footer {
   text-align: center;
@@ -774,6 +781,25 @@ main {
   font-size: 1.6rem;
   color: var(--teal-deep);
   margin-bottom: 0.8rem;
+}
+
+.site-footer__paw {
+  display: inline-block;
+  width: 0.7em;
+  height: 0.7em;
+  margin-left: 0.2em;
+  vertical-align: middle;
+  transform: rotate(-12deg);
+}
+
+.site-footer__email,
+.site-footer__copyright {
+  display: block;
+  margin-top: 0.6rem;
+}
+
+.site-footer__email {
+  color: var(--teal-deep);
 }
 
 /* ---- responsive ---- */
