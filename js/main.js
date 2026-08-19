@@ -6,6 +6,7 @@ import {
   foodEnergyKcalPer100g,
   foodCarbsPercent,
   FEUCHTE_DEFAULTS,
+  ZUSATZ_PRESETS,
   feedingGramsPerDay,
   dailyWaterNeedMl,
   foodWaterGramsPerDay,
@@ -143,11 +144,40 @@ const foodRohascheField = document.getElementById("food-rohasche");
 const foodFormError = document.getElementById("food-form-error");
 const foodList = document.getElementById("food-list");
 const foodEmpty = document.getElementById("food-empty");
+const foodWeenderFields = document.getElementById("food-weender-fields");
+const foodFeuchteHint = document.getElementById("food-feuchte-hint");
+const foodZusatzFields = document.getElementById("food-zusatz-fields");
+const foodZusatzPresets = document.getElementById("food-zusatz-presets");
+const foodKcalField = document.getElementById("food-kcal");
+
+function updateFoodTypeVisibility() {
+  const isZusatz = foodTypeField.value === "zusatz";
+  foodWeenderFields.hidden = isZusatz;
+  foodFeuchteHint.hidden = isZusatz;
+  foodZusatzFields.hidden = !isZusatz;
+}
+
+foodTypeField.addEventListener("change", updateFoodTypeVisibility);
+
+for (const preset of ZUSATZ_PRESETS) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "profile-form__preset-btn";
+  button.textContent = `${preset.name} (${preset.kcalPer100g} kcal/100g)`;
+  button.addEventListener("click", () => {
+    foodNameField.value = preset.name;
+    foodKcalField.value = preset.kcalPer100g;
+  });
+  foodZusatzPresets.appendChild(button);
+}
+
+updateFoodTypeVisibility();
 
 function resetFoodForm() {
   foodForm.reset();
   foodIdField.value = "";
   foodFormError.hidden = true;
+  updateFoodTypeVisibility();
 }
 
 function renderFoodList() {
@@ -161,17 +191,21 @@ function renderFoodList() {
     li.dataset.id = food.id;
 
     const kcal100g = foodEnergyKcalPer100g(food);
-    const carbsPercent = foodCarbsPercent(food);
 
     const typeMeta = food.feuchteGeschaetzt
       ? `${FOOD_TYPE_LABELS[food.typ]} &middot; Feuchte geschätzt (${food.feuchte}%)`
       : FOOD_TYPE_LABELS[food.typ];
 
+    const kcalMeta =
+      food.typ === "zusatz"
+        ? `${kcal100g.toFixed(1)} kcal/100g`
+        : `${kcal100g.toFixed(1)} kcal/100g &middot; ${foodCarbsPercent(food).toFixed(1)}% Kohlenhydrate (berechnet)`;
+
     li.innerHTML = `
       <div class="profile-card__main">
         <span class="profile-card__name">${food.name}</span>
         <span class="profile-card__meta">${typeMeta}</span>
-        <span class="profile-card__kcal">${kcal100g.toFixed(1)} kcal/100g &middot; ${carbsPercent.toFixed(1)}% Kohlenhydrate (berechnet)</span>
+        <span class="profile-card__kcal">${kcalMeta}</span>
       </div>
       <div class="profile-card__actions">
         <button type="button" class="btn-text" data-action="edit">Bearbeiten</button>
@@ -187,6 +221,45 @@ foodForm.addEventListener("submit", (event) => {
   foodFormError.hidden = true;
 
   const typ = foodTypeField.value;
+  const name = foodNameField.value.trim();
+
+  if (typ === "zusatz") {
+    const entry = {
+      name,
+      typ,
+      feuchte: 0,
+      kcalPer100g: Number(foodKcalField.value),
+    };
+
+    try {
+      foodEnergyKcalPer100g(entry);
+    } catch (error) {
+      foodFormError.textContent = error.message;
+      foodFormError.hidden = false;
+      return;
+    }
+
+    if (!entry.name) {
+      foodFormError.textContent = "Name darf nicht leer sein.";
+      foodFormError.hidden = false;
+      return;
+    }
+
+    const zusatzId = foodIdField.value;
+    if (zusatzId) {
+      foodStore.update(zusatzId, entry);
+    } else {
+      foodStore.add(entry);
+    }
+
+    resetFoodForm();
+    renderFoodList();
+    renderFoodOptions();
+    updateResult();
+    mealPlanner.refresh();
+    return;
+  }
+
   const feuchteRaw = foodFeuchteField.value.trim();
   let feuchte;
   let feuchteGeschaetzt = false;
@@ -204,7 +277,7 @@ foodForm.addEventListener("submit", (event) => {
   }
 
   const entry = {
-    name: foodNameField.value.trim(),
+    name,
     typ,
     feuchte,
     feuchteGeschaetzt,
@@ -277,11 +350,17 @@ foodList.addEventListener("click", (event) => {
     foodIdField.value = food.id;
     foodNameField.value = food.name;
     foodTypeField.value = food.typ;
-    foodFeuchteField.value = food.feuchte;
-    foodProteinField.value = food.protein;
-    foodFettField.value = food.fett;
-    foodRohfaserField.value = food.rohfaser;
-    foodRohascheField.value = food.rohasche;
+    updateFoodTypeVisibility();
+
+    if (food.typ === "zusatz") {
+      foodKcalField.value = food.kcalPer100g;
+    } else {
+      foodFeuchteField.value = food.feuchte;
+      foodProteinField.value = food.protein;
+      foodFettField.value = food.fett;
+      foodRohfaserField.value = food.rohfaser;
+      foodRohascheField.value = food.rohasche;
+    }
     foodNameField.focus();
   }
 

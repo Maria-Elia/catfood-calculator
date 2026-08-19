@@ -574,6 +574,10 @@ main {
   gap: 0.5rem;
 }
 
+.profile-form__row-group[hidden] {
+  display: none;
+}
+
 .profile-form__row-group {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
