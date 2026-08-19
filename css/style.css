@@ -609,6 +609,12 @@ main {
   font-size: 1.3rem;
 }
 
+.profile-form__hint {
+  color: var(--ink-soft);
+  font-size: 1.3rem;
+  margin-top: -0.6rem;
+}
+
 .btn-pill {
   align-self: flex-start;
   padding: 1.2rem 3rem;

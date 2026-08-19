@@ -24,6 +24,15 @@ export const FOOD_TYPE_LABELS = {
   leckerli: "Leckerli",
 };
 
+// Used when Feuchte is left blank on the food form. Typical moisture
+// content by type: dry food is regulatorily capped around 12%, commonly
+// manufactured near 8-10%; wet food typically runs 70-80%. Leckerli has no such typical value
+// (spans ~5% freeze-dried to ~25%+ soft treats), so it's  excluded and required.
+export const FEUCHTE_DEFAULTS = {
+  trocken: 10,
+  nass: 75,
+};
+
 export function rerKcal(weightKg) {
   if (typeof weightKg !== "number" || !(weightKg > 0)) {
     throw new Error("Gewicht muss eine Zahl größer als 0 sein.");
@@ -96,7 +105,7 @@ export function feedingGramsPerDay(dailyKcalNeed, kcalPer100g) {
   return (dailyKcalNeed / kcalPer100g) * 100;
 }
 
-// 50 ml pro kg Körpergewicht/Tag 
+// 50 ml pro kg Körpergewicht/Tag
 export function dailyWaterNeedMl(weightKg) {
   if (typeof weightKg !== "number" || !(weightKg > 0)) {
     throw new Error("Gewicht muss eine Zahl größer als 0 sein.");

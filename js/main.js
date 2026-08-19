@@ -5,6 +5,7 @@ import {
   dailyEnergyNeedKcal,
   foodEnergyKcalPer100g,
   foodCarbsPercent,
+  FEUCHTE_DEFAULTS,
   feedingGramsPerDay,
   dailyWaterNeedMl,
   foodWaterGramsPerDay,
@@ -162,10 +163,14 @@ function renderFoodList() {
     const kcal100g = foodEnergyKcalPer100g(food);
     const carbsPercent = foodCarbsPercent(food);
 
+    const typeMeta = food.feuchteGeschaetzt
+      ? `${FOOD_TYPE_LABELS[food.typ]} &middot; Feuchte geschätzt (${food.feuchte}%)`
+      : FOOD_TYPE_LABELS[food.typ];
+
     li.innerHTML = `
       <div class="profile-card__main">
         <span class="profile-card__name">${food.name}</span>
-        <span class="profile-card__meta">${FOOD_TYPE_LABELS[food.typ]}</span>
+        <span class="profile-card__meta">${typeMeta}</span>
         <span class="profile-card__kcal">${kcal100g.toFixed(1)} kcal/100g &middot; ${carbsPercent.toFixed(1)}% Kohlenhydrate (berechnet)</span>
       </div>
       <div class="profile-card__actions">
@@ -181,10 +186,28 @@ foodForm.addEventListener("submit", (event) => {
   event.preventDefault();
   foodFormError.hidden = true;
 
+  const typ = foodTypeField.value;
+  const feuchteRaw = foodFeuchteField.value.trim();
+  let feuchte;
+  let feuchteGeschaetzt = false;
+
+  if (feuchteRaw === "") {
+    if (typ === "leckerli") {
+      foodFormError.textContent = "Feuchte ist bei Leckerli ein Pflichtfeld.";
+      foodFormError.hidden = false;
+      return;
+    }
+    feuchte = FEUCHTE_DEFAULTS[typ];
+    feuchteGeschaetzt = true;
+  } else {
+    feuchte = Number(feuchteRaw);
+  }
+
   const entry = {
     name: foodNameField.value.trim(),
-    typ: foodTypeField.value,
-    feuchte: Number(foodFeuchteField.value),
+    typ,
+    feuchte,
+    feuchteGeschaetzt,
     protein: Number(foodProteinField.value),
     fett: Number(foodFettField.value),
     rohfaser: Number(foodRohfaserField.value),
@@ -208,11 +231,23 @@ foodForm.addEventListener("submit", (event) => {
 
   // A 0% field is usually a forgotten entry rather than a real value; ask
   // before saving instead of silently accepting it.
-  const zeroFieldLabels = { feuchte: "Feuchte", protein: "Protein", fett: "Fett", rohfaser: "Rohfaser", rohasche: "Rohasche" };
-  const zeroFields = Object.keys(zeroFieldLabels).filter((key) => entry[key] === 0).map((key) => zeroFieldLabels[key]);
+  const zeroFieldLabels = {
+    protein: "Protein",
+    fett: "Fett",
+    rohfaser: "Rohfaser",
+    rohasche: "Rohasche",
+  };
+  if (!feuchteGeschaetzt) {
+    zeroFieldLabels.feuchte = "Feuchte";
+  }
+  const zeroFields = Object.keys(zeroFieldLabels)
+    .filter((key) => entry[key] === 0)
+    .map((key) => zeroFieldLabels[key]);
   if (zeroFields.length > 0) {
     const verb = zeroFields.length === 1 ? "ist" : "sind";
-    const confirmed = window.confirm(`${zeroFields.join(", ")} ${verb} auf 0% gesetzt. Trotzdem speichern?`);
+    const confirmed = window.confirm(
+      `${zeroFields.join(", ")} ${verb} auf 0% gesetzt. Trotzdem speichern?`,
+    );
     if (!confirmed) return;
   }
 

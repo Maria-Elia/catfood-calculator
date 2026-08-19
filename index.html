@@ -125,7 +125,8 @@
         </select>
       </div>
 
-      <p id="meal-select-cat-hint" class="empty-state">Wähl zuerst eine Katze aus, um ihre Mahlzeit zusammenzustellen.</p>
+      <p id="meal-select-cat-hint" class="empty-state">Wähl zuerst eine Katze aus, um ihre Mahlzeit zusammenzustellen.
+      </p>
 
       <div id="meal-planner-body" hidden>
         <div class="meal-planner__add-row">
@@ -256,7 +257,7 @@
         <div class="profile-form__row-group">
           <div class="profile-form__row">
             <label for="food-feuchte">Feuchte (%)</label>
-            <input type="number" id="food-feuchte" step="0.1" min="0" max="100" required />
+            <input type="number" id="food-feuchte" step="0.1" min="0" max="100" />
           </div>
           <div class="profile-form__row">
             <label for="food-protein">Protein (%)</label>
@@ -275,6 +276,8 @@
             <input type="number" id="food-rohasche" step="0.1" min="0" max="100" required />
           </div>
         </div>
+        <p class="profile-form__hint">Falls Feuchte leer gelassen wird, wird geschätzt: Trockenfutter 10%, Nassfutter
+          75%. <br> Bei Leckerli Pflichtfeld (zu unterschiedlich für einen Schätzwert).</p>
         <p id="food-form-error" class="form-error" hidden></p>
         <button type="submit" class="btn-pill">Futter speichern</button>
       </form>
