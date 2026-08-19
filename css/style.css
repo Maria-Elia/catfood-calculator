@@ -615,6 +615,27 @@ main {
   margin-top: -0.6rem;
 }
 
+.profile-form__zusatz-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+
+.profile-form__preset-btn {
+  padding: 0.6rem 1.4rem;
+  border-radius: 10rem;
+  border: 1px solid var(--teal);
+  background: var(--white);
+  color: var(--teal-deep);
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.profile-form__preset-btn:hover {
+  background: var(--teal-tint);
+}
+
 .btn-pill {
   align-self: flex-start;
   padding: 1.2rem 3rem;
