@@ -458,10 +458,15 @@ main {
   width: 10rem;
 }
 
+.meal-planner__table-wrap {
+  overflow-x: auto;
+  margin-bottom: 1rem;
+}
+
 .meal-planner__table {
   width: 100%;
+  min-width: 32rem;
   border-collapse: collapse;
-  margin-bottom: 1rem;
 }
 
 .meal-planner__table th {
