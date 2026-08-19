@@ -7,6 +7,7 @@ import {
   FOOD_TYPE_LABELS,
   foodEnergyKcalPer100g,
   foodCarbsPercent,
+  ZUSATZ_PRESETS,
   feedingGramsPerDay,
   dailyWaterNeedMl,
   foodWaterGramsPerDay,
@@ -203,4 +204,53 @@ test('mealStatus returns rot beyond 10% deviation', () => {
 test('mealStatus rejects a non-positive daily need', () => {
   assert.throws(() => mealStatus(100, 0), /Tagesbedarf/);
   assert.throws(() => mealStatus(100, -5), /Tagesbedarf/);
+});
+
+test('FOOD_TYPE_LABELS includes zusatz', () => {
+  assert.equal(FOOD_TYPE_LABELS.zusatz, 'Zusatz');
+});
+
+test('ZUSATZ_PRESETS contains the 8 research-backed additive presets', () => {
+  assert.deepEqual(ZUSATZ_PRESETS, [
+    { name: 'Lachsöl', kcalPer100g: 902 },
+    { name: 'Lebertran', kcalPer100g: 902 },
+    { name: 'Kokosöl', kcalPer100g: 892 },
+    { name: 'Leinöl', kcalPer100g: 884 },
+    { name: 'Distelöl', kcalPer100g: 884 },
+    { name: 'Algenöl', kcalPer100g: 857 },
+    { name: 'Hanföl', kcalPer100g: 867 },
+    { name: 'Eigelb', kcalPer100g: 322 },
+  ]);
+});
+
+test('foodEnergyKcalPer100g returns kcalPer100g directly for typ zusatz', () => {
+  const result = foodEnergyKcalPer100g({ typ: 'zusatz', feuchte: 0, kcalPer100g: 902 });
+  assert.equal(result, 902);
+});
+
+test('foodEnergyKcalPer100g rejects a non-positive kcalPer100g for typ zusatz', () => {
+  assert.throws(
+    () => foodEnergyKcalPer100g({ typ: 'zusatz', feuchte: 0, kcalPer100g: 0 }),
+    /kcal\/100g/,
+  );
+  assert.throws(
+    () => foodEnergyKcalPer100g({ typ: 'zusatz', feuchte: 0, kcalPer100g: -5 }),
+    /kcal\/100g/,
+  );
+  assert.throws(
+    () => foodEnergyKcalPer100g({ typ: 'zusatz', feuchte: 0 }),
+    /kcal\/100g/,
+  );
+});
+
+test('foodEnergyKcalPer100g still computes via the Weender formula for non-zusatz types', () => {
+  const result = foodEnergyKcalPer100g({
+    typ: 'nass',
+    feuchte: 80,
+    protein: 10,
+    fett: 6,
+    rohfaser: 0.5,
+    rohasche: 2,
+  });
+  assert.ok(Math.abs(result - 95.412) < 0.01, `expected ~95.41, got ${result}`);
 });

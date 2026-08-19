@@ -22,6 +22,7 @@ export const FOOD_TYPE_LABELS = {
   trocken: "Trockenfutter",
   nass: "Nassfutter",
   leckerli: "Leckerli",
+  zusatz: "Zusatz",
 };
 
 // Used when Feuchte is left blank on the food form. Typical moisture
@@ -32,6 +33,20 @@ export const FEUCHTE_DEFAULTS = {
   trocken: 10,
   nass: 75,
 };
+
+// Research-backed kcal/100g for common calorie-dense additives (oils are
+// near-pure fat; egg yolk is fat-dominant). Sourced from USDA FoodData
+// Central, Healthline (Algenöl), and SparkPeople
+export const ZUSATZ_PRESETS = [
+  { name: "Lachsöl", kcalPer100g: 902 },
+  { name: "Lebertran", kcalPer100g: 902 },
+  { name: "Kokosöl", kcalPer100g: 892 },
+  { name: "Leinöl", kcalPer100g: 884 },
+  { name: "Distelöl", kcalPer100g: 884 },
+  { name: "Algenöl", kcalPer100g: 857 },
+  { name: "Hanföl", kcalPer100g: 867 },
+  { name: "Eigelb", kcalPer100g: 322 },
+];
 
 export function rerKcal(weightKg) {
   if (typeof weightKg !== "number" || !(weightKg > 0)) {
@@ -79,6 +94,16 @@ export function foodCarbsPercent(food) {
 }
 
 export function foodEnergyKcalPer100g(food) {
+  if (food.typ === "zusatz") {
+    // Oils and egg yolk are concentrated enough that the Weender formula's
+    // digestibility correction (calibrated for typical mixed pet food)
+    // systematically underestimates them. Store and use the real, looked-up value instead.
+    if (typeof food.kcalPer100g !== "number" || food.kcalPer100g <= 0) {
+      throw new Error("kcal/100g muss eine Zahl größer als 0 sein.");
+    }
+    return food.kcalPer100g;
+  }
+
   const { protein, fett, rohfaser } = food;
   const { ts, nfe } = computeNfe(food);
 
