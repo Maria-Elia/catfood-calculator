@@ -214,7 +214,7 @@ export function initMealPlanner({ catStore, foodStore }) {
     }
     if (draftComponents.some((component) => component.foodId === foodId)) {
       addError.textContent =
-        "Dieses Futter ist schon in der Mahlzeit. Passe die Menge direkt in der Tabelle an.";
+        "Dieses Futter ist schon im Tagesplan. Passe die Menge direkt in der Tabelle an.";
       addError.hidden = false;
       return;
     }

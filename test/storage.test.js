@@ -127,7 +127,7 @@ test('meal store update() changes an existing meal', () => {
 
 test('meal store update() throws for an unknown meal id', () => {
   const store = createMealStore(createMemoryBackend());
-  assert.throws(() => store.update('cat-1', 'nope', { name: 'x' }), /Keine Mahlzeit/);
+  assert.throws(() => store.update('cat-1', 'nope', { name: 'x' }), /Kein Tagesplan/);
 });
 
 test('meal store remove() deletes a meal', () => {

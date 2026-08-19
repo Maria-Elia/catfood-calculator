@@ -75,7 +75,7 @@
           <span class="result-panel__label">Noch extra nötig</span>
           <span id="result-water-extra" class="result-panel__value result-panel__value--water-accent"></span>
         </div>
-        <button type="button" id="use-as-meal-btn" class="btn-pill">Als Mahlzeit weiterbearbeiten</button>
+        <button type="button" id="use-as-meal-btn" class="btn-pill">Als Tagesplan weiterbearbeiten</button>
       </div>
       <div id="result-empty" class="result-preview">
         <div class="result-preview__rows" aria-hidden="true">
@@ -115,7 +115,7 @@
     <section id="mahlzeiten" class="calculator meal-planner">
       <h2 class="section-title">
         <img class="section-title__icon" src="assets/svg/cat-bowl.svg" alt="" aria-hidden="true" />
-        Mahlzeiten-Planer
+        Tagesplaner
       </h2>
 
       <div class="calculator__picker">
@@ -125,7 +125,7 @@
         </select>
       </div>
 
-      <p id="meal-select-cat-hint" class="empty-state">Wähl zuerst eine Katze aus, um ihre Mahlzeit zusammenzustellen.
+      <p id="meal-select-cat-hint" class="empty-state">Wähl zuerst eine Katze aus, um ihren Tagesplan zusammenzustellen.
       </p>
 
       <div id="meal-planner-body" hidden>
@@ -158,7 +158,7 @@
             <tbody id="meal-component-list"></tbody>
           </table>
         </div>
-        <p id="meal-empty" class="empty-state">Noch keine Mahlzeit zusammengestellt.</p>
+        <p id="meal-empty" class="empty-state">Noch keinen Tagesplan zusammengestellt.</p>
 
         <div id="meal-summary" class="meal-summary" hidden>
           <div class="meal-summary__row">
@@ -178,7 +178,7 @@
             <span id="meal-summary-water-need" class="meal-summary__value"></span>
           </div>
           <div class="meal-summary__row">
-            <span class="meal-summary__label">Wasser aus Mahlzeit</span>
+            <span class="meal-summary__label">Wasser aus Tagesplan</span>
             <span id="meal-summary-water-food" class="meal-summary__value"></span>
           </div>
           <div class="meal-summary__row">
@@ -190,16 +190,16 @@
         <div class="meal-planner__save-row">
           <div class="meal-planner__add-field">
             <label for="meal-name-input">Name</label>
-            <input type="text" id="meal-name-input" placeholder="z. B. Frühstück" />
+            <input type="text" id="meal-name-input" placeholder="z. B. Diät-Tag" />
           </div>
-          <button type="button" id="meal-save-btn" class="btn-pill">Mahlzeit speichern</button>
-          <button type="button" id="meal-new-btn" class="btn-text">Neue Mahlzeit</button>
+          <button type="button" id="meal-save-btn" class="btn-pill">Tagesplan speichern</button>
+          <button type="button" id="meal-new-btn" class="btn-text">Neuer Tagesplan</button>
         </div>
         <p id="meal-save-error" class="form-error" hidden></p>
 
-        <h3 class="meal-planner__subtitle">Meine Mahlzeiten</h3>
+        <h3 class="meal-planner__subtitle">Meine Tagespläne</h3>
         <ul id="meal-saved-list" class="profile-list"></ul>
-        <p id="meal-saved-empty" class="empty-state">Noch keine Mahlzeit für diese Katze gespeichert.</p>
+        <p id="meal-saved-empty" class="empty-state">Noch kein Tagesplan für diese Katze gespeichert.</p>
       </div>
     </section>
 

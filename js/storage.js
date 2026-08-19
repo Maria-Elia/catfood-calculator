@@ -97,7 +97,7 @@ export function createMealStore(backend) {
       const catMeals = meals[catId] || [];
       const index = catMeals.findIndex((meal) => meal.id === mealId);
       if (index === -1) {
-        throw new Error(`Keine Mahlzeit mit id ${mealId} gefunden.`);
+        throw new Error(`Kein Tagesplan mit id ${mealId} gefunden.`);
       }
       catMeals[index] = { ...catMeals[index], ...changes };
       meals[catId] = catMeals;
