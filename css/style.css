@@ -103,6 +103,15 @@ input {
   stroke: var(--pink);
 }
 
+.hero__title-paw {
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  margin-left: 0.12em;
+  vertical-align: middle;
+  transform: rotate(-12deg);
+}
+
 .hero__inner {
   position: relative;
   z-index: 1;
