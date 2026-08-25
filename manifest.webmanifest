@@ -1,0 +1,17 @@
+{
+  "name": "Katzenfutter-Rechner",
+  "short_name": "Katzenfutter",
+  "description": "Berechnet Tagesbedarf und Futtermenge für deine Katze.",
+  "lang": "de",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#EEF3F6",
+  "theme_color": "#0F7F88",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
