@@ -530,3 +530,36 @@ useAsMealBtn.addEventListener("click", () => {
 
   mealPlanner.useAsMealBase(cat.id, food.id, Math.round(grams));
 });
+
+// PWA: service worker registration + update banner
+if ("serviceWorker" in navigator) {
+  const swUpdateBanner = document.getElementById("sw-update-banner");
+  const swUpdateButton = document.getElementById("sw-update-button");
+
+  navigator.serviceWorker
+    .register("/sw.js")
+    .then((registration) => {
+      registration.addEventListener("updatefound", () => {
+        const newWorker = registration.installing;
+        newWorker.addEventListener("statechange", () => {
+          if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+            swUpdateBanner.hidden = false;
+          }
+        });
+      });
+
+      swUpdateButton.addEventListener("click", () => {
+        if (registration.waiting) {
+          registration.waiting.postMessage({ type: "SKIP_WAITING" });
+        }
+      });
+    })
+    .catch(() => {});
+
+  let refreshing = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+}
