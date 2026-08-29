@@ -568,23 +568,41 @@ if ("serviceWorker" in navigator) {
 (function setupInstallBanner() {
   const INSTALL_DISMISSED_KEY = "installBannerDismissed";
 
+  const ua = window.navigator.userAgent;
   const isStandalone =
     window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-  const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent) && !window.MSStream;
-
-  if (isStandalone || window.localStorage.getItem(INSTALL_DISMISSED_KEY)) return;
+  const isIOS = /iphone|ipad|ipod/i.test(ua) && !window.MSStream;
+  const isIOSChrome = /crios/i.test(ua);
+  const isIOSFirefox = /fxios/i.test(ua);
+  const isSafari = /^((?!chrome|android).)*safari/i.test(ua) && !isIOSChrome && !isIOSFirefox;
+  const isFirefox = /firefox/i.test(ua) && !isIOSFirefox;
 
   const installBanner = document.getElementById("install-banner");
   const installBannerContent = document.getElementById("install-banner-content");
+  const footerInstallLink = document.getElementById("footer-install-link");
+
+  if (isStandalone) {
+    if (footerInstallLink) footerInstallLink.hidden = true;
+    return;
+  }
+
+  let deferredPrompt = null;
+
+  const shareIcon = `<svg class="install-step__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12" /><path d="M8 7l4-4 4 4" /><rect x="5" y="11" width="14" height="10" rx="2" /></svg>`;
+  const addIcon = `<svg class="install-step__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="M12 9v6" /><path d="M9 12h6" /></svg>`;
 
   function dismissInstallBanner() {
     window.localStorage.setItem(INSTALL_DISMISSED_KEY, "1");
-    installBanner.hidden = true;
+    installBannerContent.innerHTML =
+      "<p>Kein Problem! Du findest die Installationsanleitung jederzeit unten im Footer unter „App installieren“.</p>";
+    window.setTimeout(() => {
+      installBanner.hidden = true;
+    }, 3000);
   }
 
-  function renderInstallBanner({ text, actionLabel, onAction }) {
-    installBannerContent.innerHTML = `<p>${text}</p><div class="onboarding-banner__actions"></div>`;
-    const actions = installBannerContent.querySelector(".onboarding-banner__actions");
+  function buildActions(actionLabel, onAction) {
+    const actions = document.createElement("div");
+    actions.className = "onboarding-banner__actions";
 
     if (actionLabel && onAction) {
       const actionButton = document.createElement("button");
@@ -602,27 +620,102 @@ if ("serviceWorker" in navigator) {
     dismissButton.addEventListener("click", dismissInstallBanner);
     actions.appendChild(dismissButton);
 
-    installBanner.hidden = false;
+    return actions;
   }
 
-  if (isIOS) {
-    renderInstallBanner({
-      text: "Installiere den Katzenfutter-Rechner als App: Tippe unten auf Teilen und dann auf „Zum Home-Bildschirm“.",
-    });
-    return;
+  function showBanner() {
+    installBanner.hidden = false;
+    installBanner.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function showIOSSafariTutorial() {
+    installBannerContent.innerHTML = `
+      <p>Installiere den Katzenfutter-Rechner als App:</p>
+      <ol class="install-steps">
+        <li class="install-step">${shareIcon}<p>Tippe unten in Safari auf <strong>Teilen</strong></p></li>
+        <li class="install-step">${addIcon}<p>Wähle <strong>„Zum Home-Bildschirm“</strong></p></li>
+      </ol>
+    `;
+    installBannerContent.appendChild(buildActions());
+    showBanner();
+  }
+
+  function showIOSOtherBrowserTutorial() {
+    installBannerContent.innerHTML =
+      "<p>Chrome und Firefox können auf dem iPhone keine Apps installieren. Öffne diese Seite in <strong>Safari</strong>, um sie zu installieren.</p>";
+    installBannerContent.appendChild(buildActions());
+    showBanner();
+  }
+
+  function showMacSafariTutorial() {
+    installBannerContent.innerHTML = `
+      <p>Installiere den Katzenfutter-Rechner als App:</p>
+      <ol class="install-steps">
+        <li class="install-step">${shareIcon}<p>Öffne oben das Menü <strong>Ablage</strong></p></li>
+        <li class="install-step">${addIcon}<p>Wähle <strong>„Zum Dock hinzufügen“</strong></p></li>
+      </ol>
+    `;
+    installBannerContent.appendChild(buildActions());
+    showBanner();
+  }
+
+  function showChromiumTutorial() {
+    installBannerContent.innerHTML = "<p>Installiere den Katzenfutter-Rechner als App für schnelleren Zugriff.</p>";
+    installBannerContent.appendChild(
+      buildActions("Installieren", async () => {
+        installBanner.hidden = true;
+        if (deferredPrompt) await deferredPrompt.prompt();
+      }),
+    );
+    showBanner();
+  }
+
+  function showFirefoxTutorial() {
+    installBannerContent.innerHTML =
+      "<p>Firefox unterstützt die Installation als App aktuell nicht. Nutze Chrome, Edge oder Safari, um den Rechner zu installieren.</p>";
+    installBannerContent.appendChild(buildActions());
+    showBanner();
+  }
+
+  function showFallbackTutorial() {
+    installBannerContent.innerHTML =
+      "<p>Öffne das Menü deines Browsers und wähle „App installieren“ oder „Zum Startbildschirm hinzufügen“.</p>";
+    installBannerContent.appendChild(buildActions());
+    showBanner();
+  }
+
+  function openInstallTutorial() {
+    if (isIOS) {
+      if (isSafari) showIOSSafariTutorial();
+      else showIOSOtherBrowserTutorial();
+    } else if (deferredPrompt) {
+      showChromiumTutorial();
+    } else if (isSafari) {
+      showMacSafariTutorial();
+    } else if (isFirefox) {
+      showFirefoxTutorial();
+    } else {
+      showFallbackTutorial();
+    }
+  }
+
+  if (footerInstallLink) {
+    footerInstallLink.addEventListener("click", openInstallTutorial);
+  }
+
+  if (!window.localStorage.getItem(INSTALL_DISMISSED_KEY) && isIOS) {
+    if (isSafari) showIOSSafariTutorial();
+    else showIOSOtherBrowserTutorial();
   }
 
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
-    renderInstallBanner({
-      text: "Installiere den Katzenfutter-Rechner als App für schnelleren Zugriff.",
-      actionLabel: "Installieren",
-      onAction: async () => {
-        installBanner.hidden = true;
-        await event.prompt();
-      },
-    });
+    deferredPrompt = event;
+    if (!window.localStorage.getItem(INSTALL_DISMISSED_KEY)) showChromiumTutorial();
   });
 
-  window.addEventListener("appinstalled", dismissInstallBanner);
+  window.addEventListener("appinstalled", () => {
+    window.localStorage.setItem(INSTALL_DISMISSED_KEY, "1");
+    installBanner.hidden = true;
+  });
 })();

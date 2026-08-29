@@ -1,4 +1,4 @@
-const CACHE_NAME = "catfood-v3";
+const CACHE_NAME = "catfood-v4";
 
 const APP_SHELL = [
   "/",
