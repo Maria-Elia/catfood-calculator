@@ -927,6 +927,10 @@ main {
   .site-footer__support-text {
     margin: 0 auto;
   }
+
+  .site-footer__button-link {
+    justify-content: center;
+  }
 }
 
 /* ---- responsive ---- */
