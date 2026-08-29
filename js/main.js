@@ -563,3 +563,66 @@ if ("serviceWorker" in navigator) {
     window.location.reload();
   });
 }
+
+// PWA: "add to home screen" tutorial banner
+(function setupInstallBanner() {
+  const INSTALL_DISMISSED_KEY = "installBannerDismissed";
+
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  const isIOS = /iphone|ipad|ipod/i.test(window.navigator.userAgent) && !window.MSStream;
+
+  if (isStandalone || window.localStorage.getItem(INSTALL_DISMISSED_KEY)) return;
+
+  const installBanner = document.getElementById("install-banner");
+  const installBannerContent = document.getElementById("install-banner-content");
+
+  function dismissInstallBanner() {
+    window.localStorage.setItem(INSTALL_DISMISSED_KEY, "1");
+    installBanner.hidden = true;
+  }
+
+  function renderInstallBanner({ text, actionLabel, onAction }) {
+    installBannerContent.innerHTML = `<p>${text}</p><div class="onboarding-banner__actions"></div>`;
+    const actions = installBannerContent.querySelector(".onboarding-banner__actions");
+
+    if (actionLabel && onAction) {
+      const actionButton = document.createElement("button");
+      actionButton.type = "button";
+      actionButton.className = "onboarding-banner__link";
+      actionButton.textContent = actionLabel;
+      actionButton.addEventListener("click", onAction);
+      actions.appendChild(actionButton);
+    }
+
+    const dismissButton = document.createElement("button");
+    dismissButton.type = "button";
+    dismissButton.className = "onboarding-banner__link";
+    dismissButton.textContent = "Später";
+    dismissButton.addEventListener("click", dismissInstallBanner);
+    actions.appendChild(dismissButton);
+
+    installBanner.hidden = false;
+  }
+
+  if (isIOS) {
+    renderInstallBanner({
+      text: "Installiere den Katzenfutter-Rechner als App: Tippe unten auf Teilen und dann auf „Zum Home-Bildschirm“.",
+    });
+    return;
+  }
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    renderInstallBanner({
+      text: "Installiere den Katzenfutter-Rechner als App für schnelleren Zugriff.",
+      actionLabel: "Installieren",
+      onAction: async () => {
+        installBanner.hidden = true;
+        await event.prompt();
+      },
+    });
+  });
+
+  window.addEventListener("appinstalled", dismissInstallBanner);
+})();
