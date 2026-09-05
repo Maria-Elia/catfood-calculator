@@ -93,6 +93,23 @@ html {
     scroll-behavior: auto;
   }
 }
+@media (max-width: 1024px) {
+  html:has(.legal-page) {
+    font-size: 8.5px;
+  }
+}
+
+@media (max-width: 768px) {
+  html:has(.legal-page) {
+    font-size: 5.5px;
+  }
+}
+
+@media (max-width: 480px) {
+  html:has(.legal-page) {
+    font-size: 4px;
+  }
+}
 
 body {
   font-family: "Poppins", sans-serif;
@@ -524,6 +541,14 @@ body:has(.legal-page) {
   align-items: flex-end;
   gap: 0.7rem;
   margin: 9rem 4rem 3rem auto;
+}
+
+@media (max-width: 650px) {
+  .site-footer--plain .site-footer__content {
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+    margin-right: 1.5rem;
+  }
 }
 
 .site-footer--plain .site-footer__wordmark {
