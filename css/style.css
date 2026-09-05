@@ -368,40 +368,56 @@ main {
   text-align: center;
 }
 
-/* ---- info section (methodology / FAQ) ---- */
-.info-section p {
-  font-size: 1.5rem;
-  line-height: 1.65;
-  color: var(--ink);
-  max-width: 58rem;
+/* ---- FAQ accordion ---- */
+.faq {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.info-section p + p {
-  margin-top: 1.4rem;
-}
-
-.info-section__example {
-  background: var(--bg-elevated);
+.faq__item {
   border: 1px solid var(--line);
   border-radius: 1rem;
   padding: 1.4rem 1.8rem;
 }
 
-.info-section__meta {
-  color: var(--ink-soft);
-  font-size: 1.4rem;
-}
-
-.faq {
-  display: flex;
-  flex-direction: column;
-  gap: 1.8rem;
-}
-
-.faq__item h3 {
+.faq__item summary {
   font-size: 1.6rem;
+  font-weight: 600;
   color: var(--ink);
-  margin-bottom: 0.5rem;
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.faq__item summary:active {
+  transform: scale(0.99);
+}
+
+.faq__item summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq__item summary::after {
+  content: "+";
+  flex-shrink: 0;
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--teal-deep);
+  transition: transform 160ms ease;
+}
+
+.faq__item[open] summary::after {
+  transform: rotate(45deg);
+}
+
+.faq__item summary:focus-visible {
+  outline: 2px solid var(--teal-deep);
+  outline-offset: 2px;
 }
 
 .faq__item p {
@@ -409,6 +425,7 @@ main {
   line-height: 1.6;
   color: var(--ink-soft);
   max-width: 58rem;
+  margin-top: 1.2rem;
 }
 
 /* ---- legal page (datenschutz) ---- */
@@ -1059,18 +1076,20 @@ body:has(.legal-page) {
   appearance: none;
   background: none;
   border: 0;
-  padding: 1rem 0;
-  min-height: 4.4rem;
-  width: 100%;
+  padding: 0.3rem 0;
   display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
   gap: 0.5rem;
   font: inherit;
   color: inherit;
   text-align: inherit;
   text-decoration: underline;
   cursor: pointer;
+  transition: transform 160ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.site-footer__button-link:active {
+  transform: scale(0.97);
 }
 
 .site-footer__install-icon {

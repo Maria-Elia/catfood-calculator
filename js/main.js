@@ -12,10 +12,12 @@ import {
   foodWaterGramsPerDay,
 } from "./calc.js";
 import { initMealPlanner } from "./mealPlanner.js";
+import { initFaqAccordion } from "./faqAccordion.js";
 
 const catStore = createCatStore(window.localStorage);
 const foodStore = createFoodStore(window.localStorage);
 const mealPlanner = initMealPlanner({ catStore, foodStore });
+initFaqAccordion();
 
 // ---- Cats ----
 

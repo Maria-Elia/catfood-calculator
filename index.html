@@ -243,29 +243,6 @@
         bei Diät, Erkrankung oder Kitten.</p>
     </section>
 
-    <section id="berechnung" class="calculator info-section">
-      <h2 class="section-title">
-        <img class="section-title__icon" src="assets/svg/cat-bowl.svg" alt="" aria-hidden="true" />
-        So wird berechnet
-      </h2>
-      <p>Der Tagesbedarf deiner Katze basiert auf ihrem Ruheenergiebedarf (RER), berechnet aus dem Körpergewicht
-        nach einer anerkannten Formel der Veterinärernährung (RER = 70 &times; Körpergewicht in kg<sup>0,75</sup>).
-        Je nach Lebensphase und Kastrationsstatus wird dieser Wert angepasst &ndash; kastrierte Katzen haben einen
-        niedrigeren Energiebedarf als unkastrierte, Kitten einen deutlich höheren.</p>
-      <p>Der Energiegehalt deines Futters wird aus den analytischen Bestandteilen berechnet &ndash; genau den
-        Werten, die du auf der Rückseite der Futterverpackung findest (Feuchte, Protein, Fett, Rohfaser,
-        Rohasche). Diese Berechnung folgt dem in der Tierernährung gebräuchlichen Weender-Verfahren mit einer
-        verdaulichkeitskorrigierten Energiewertformel, wie sie auch in der veterinärmedizinischen
-        Fachliteratur verwendet wird.</p>
-      <p class="info-section__example"><strong>Beispiel:</strong> Eine kastrierte, erwachsene Katze mit 4 kg
-        Gewicht hat einen Tagesbedarf von rund 200 kcal. Bei einem Nassfutter mit 85 kcal pro 100 g entspricht das
-        etwa 235 g Futter am Tag, aufgeteilt auf 2&ndash;3 Mahlzeiten.</p>
-      <p class="info-section__meta">Ich habe diesen Rechner gebaut, weil ich selbst oft die Rückseite von
-        Futterverpackungen entziffern musste, um herauszufinden, wie viel meine Katzen wirklich brauchen. Er
-        läuft komplett lokal in deinem Browser &ndash; deine gespeicherten Katzen- und Futterdaten verlassen dein
-        Gerät nie.</p>
-    </section>
-
     <section id="mahlzeiten" class="calculator meal-planner">
       <h2 class="section-title">
         <img class="section-title__icon" src="assets/svg/cat-bowl.svg" alt="" aria-hidden="true" />
@@ -479,28 +456,86 @@
         Häufige Fragen
       </h2>
       <div class="faq">
-        <div class="faq__item">
-          <h3>Wie oft sollte ich meine Katze füttern?</h3>
-          <p>Die Tagesmenge kannst du auf 3 bis 5 kleine Mahlzeiten aufteilen. Katzen fressen von Natur aus
-            lieber öfter und in kleineren Portionen als ein bis zwei große Mahlzeiten.</p>
-        </div>
-        <div class="faq__item">
-          <h3>Ist Nassfutter oder Trockenfutter besser?</h3>
-          <p>Nassfutter hat einen deutlich höheren Wasseranteil (70&ndash;80&nbsp;% gegenüber ca. 10&nbsp;% bei
-            Trockenfutter) und deckt so einen großen Teil des täglichen Wasserbedarfs mit ab. Trockenfutter ist
-            kalorienreicher pro Gramm.</p>
-        </div>
-        <div class="faq__item">
-          <h3>Was, wenn meine Katze übergewichtig ist?</h3>
-          <p>Wähle bei &bdquo;Status&ldquo; die Option &bdquo;Übergewichtig / Diät&ldquo; &ndash; der Rechner setzt
-            dann einen niedrigeren Energiefaktor an. Eine Gewichtsreduktion sollte langsam und idealerweise
-            tierärztlich begleitet erfolgen.</p>
-        </div>
-        <div class="faq__item">
-          <h3>Woher bekomme ich die Werte Feuchte, Protein, Fett, Rohfaser und Rohasche?</h3>
-          <p>Diese stehen unter &bdquo;Analytische Bestandteile&ldquo; auf der Rückseite der
-            Futterverpackung.</p>
-        </div>
+        <details class="faq__item" open>
+          <summary>Wie wird der Tagesbedarf meiner Katze berechnet?</summary>
+          <div class="faq__item-content">
+            <p>Der Tagesbedarf basiert auf dem Ruheenergiebedarf (RER), berechnet aus dem Körpergewicht nach einer
+              anerkannten Formel der Veterinärernährung (RER = 70 &times; Körpergewicht in kg<sup>0,75</sup>). Je
+              nach Lebensphase und Kastrationsstatus wird dieser Wert angepasst; kastrierte Katzen haben
+              einen niedrigeren Energiebedarf als unkastrierte, Kitten einen deutlich höheren.</p>
+          </div>
+        </details>
+        <details class="faq__item">
+          <summary>Wie wird die Futtermenge aus den Nährwerten berechnet?</summary>
+          <div class="faq__item-content">
+            <p>Der Energiegehalt deines Futters wird aus den analytischen Bestandteilen berechnet; genau
+              den Werten, die du auf der Rückseite der Futterverpackung findest (Feuchte, Protein, Fett,
+              Rohfaser, Rohasche). Diese Berechnung folgt dem in der Tierernährung gebräuchlichen
+              Weender-Verfahren mit einer verdaulichkeitskorrigierten Energiewertformel, wie sie auch in der
+              veterinärmedizinischen Fachliteratur verwendet wird.</p>
+          </div>
+        </details>
+        <details class="faq__item">
+          <summary>Welche wissenschaftlichen Quellen verwendet der Rechner?</summary>
+          <div class="faq__item-content">
+            <p>Der Tagesbedarf basiert auf der allometrischen RER-Formel (Ruheenergiebedarf = 70 &times;
+              Körpergewicht in kg<sup>0,75</sup>), einem Standardansatz aus der veterinärmedizinischen
+              Ernährungslehre, wie er unter anderem in den Ernährungsleitlinien der WSAVA und im NRC-Werk
+              &bdquo;Nutrient Requirements of Dogs and Cats&ldquo; beschrieben ist. Der Energiegehalt des
+              Futters wird mit der von Ellen Kienzle für Katzen angepassten Weender-Stoffwechselenergie-Formel
+              berechnet, die analytische Bestandteile (Feuchte, Protein, Fett, Rohfaser, Rohasche) über
+              Verdaulichkeitsfaktoren in kcal umrechnet. Die kcal-Werte für Öle und Eigelb im
+              Zusatz-Bereich stammen aus der USDA FoodData Central Datenbank. Der gesamte Rechenweg ist offen
+              einsehbar im Quellcode dieses Projekts.</p>
+          </div>
+        </details>
+        <details class="faq__item">
+          <summary>Kannst du mir ein Rechenbeispiel zeigen?</summary>
+          <div class="faq__item-content">
+            <p>Eine kastrierte, erwachsene Katze mit 4 kg Gewicht hat einen Tagesbedarf von rund 200 kcal. Bei
+              einem Nassfutter mit 85 kcal pro 100 g entspricht das etwa 235 g Futter am Tag, aufgeteilt auf
+              3 bis 5 Mahlzeiten.</p>
+          </div>
+        </details>
+        <details class="faq__item">
+          <summary>Wie oft sollte ich meine Katze füttern?</summary>
+          <div class="faq__item-content">
+            <p>Die Tagesmenge kannst du auf 3 bis 5 kleine Mahlzeiten aufteilen. Katzen fressen von Natur aus
+              lieber öfter und in kleineren Portionen als ein bis zwei große Mahlzeiten.</p>
+          </div>
+        </details>
+        <details class="faq__item">
+          <summary>Ist Nassfutter oder Trockenfutter besser?</summary>
+          <div class="faq__item-content">
+            <p>Nassfutter hat einen deutlich höheren Wasseranteil (70&ndash;80&nbsp;% gegenüber ca. 10&nbsp;% bei
+              Trockenfutter) und deckt so einen großen Teil des täglichen Wasserbedarfs mit ab. Trockenfutter ist
+              kalorienreicher pro Gramm.</p>
+          </div>
+        </details>
+        <details class="faq__item">
+          <summary>Was, wenn meine Katze übergewichtig ist?</summary>
+          <div class="faq__item-content">
+            <p>Wähle bei &bdquo;Status&ldquo; die Option &bdquo;Übergewichtig / Diät&ldquo; &ndash; der Rechner
+              setzt dann einen niedrigeren Energiefaktor an. Eine Gewichtsreduktion sollte langsam und
+              idealerweise tierärztlich begleitet erfolgen.</p>
+          </div>
+        </details>
+        <details class="faq__item">
+          <summary>Woher bekomme ich die Werte Feuchte, Protein, Fett, Rohfaser und Rohasche?</summary>
+          <div class="faq__item-content">
+            <p>Diese stehen unter &bdquo;Analytische Bestandteile&ldquo; auf der Rückseite der
+              Futterverpackung.</p>
+          </div>
+        </details>
+        <details class="faq__item">
+          <summary>Wer steckt hinter diesem Rechner?</summary>
+          <div class="faq__item-content">
+            <p>Ich habe diesen Rechner gebaut, weil die Angaben auf der Rückseite oft ungenau sind. Außerdem hat keine
+              andere Seite kombiniert, was ich gebraucht habe. Er läuft komplett
+              lokal in deinem Browser, deine gespeicherten Katzen- und Futterdaten verlassen dein Gerät
+              nie.</p>
+          </div>
+        </details>
       </div>
     </section>
   </main>
