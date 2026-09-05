@@ -1,0 +1,7 @@
+# Katzenfutter-Rechner
+
+> Kostenloser deutschsprachiger Katzenfutter-Rechner: berechnet den täglichen Kalorienbedarf, die passende Futtermenge in Gramm und den Wasserbedarf einer Katze, basierend auf Körpergewicht, Lebensphase/Kastrationsstatus und den analytischen Bestandteilen (Feuchte, Protein, Fett, Rohfaser, Rohasche) des Futters.
+
+Der Rechner nutzt die Ruheenergiebedarf-Formel (RER = 70 × Körpergewicht in kg^0,75) mit einem Lebensphasen-/Kastrationsfaktor sowie ein Weender-Verfahren zur Berechnung des Energiegehalts aus den analytischen Bestandteilen des Futters. Alle Daten (Katzen- und Futterprofile) werden ausschließlich lokal im Browser gespeichert (localStorage) und nicht an einen Server übertragen.
+
+- [Katzenfutter-Rechner](https://catfood.mariaelia.de/): Die Web-App selbst (PWA, offline-fähig).

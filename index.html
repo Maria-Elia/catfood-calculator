@@ -4,11 +4,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Katzenfutter-Rechner</title>
+  <title>Katzenfutter-Rechner – Tagesbedarf & Futtermenge für deine Katze berechnen</title>
+  <meta name="description"
+    content="Kostenloser Katzenfutter-Rechner: Berechne den täglichen Kalorienbedarf deiner Katze, die passende Futtermenge in Gramm und den Wasserbedarf. Basierend auf Gewicht, Lebensphase und den Nährwertangaben deines Futters." />
+  <link rel="canonical" href="https://catfood.mariaelia.de/" />
   <link rel="icon" type="image/svg+xml" href="assets/svg/favicon.svg" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Poppins:wght@400;600;700&display=swap" />
+  <link rel="preload" href="assets/fonts/fredoka-500-600.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/fonts/poppins-400.woff2" as="font" type="font/woff2" crossorigin />
   <link rel="stylesheet" href="css/style.css" />
   <script data-goatcounter="https://catfood-mariaelia.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 
@@ -18,6 +20,67 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Katzenfutter" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="de_DE" />
+  <meta property="og:site_name" content="Katzenfutter-Rechner" />
+  <meta property="og:title" content="Katzenfutter-Rechner: Tagesbedarf & Futtermenge berechnen" />
+  <meta property="og:description"
+    content="Berechne Tagesbedarf, Futtermenge und Wasserbedarf deiner Katze. Kostenlos, ohne Anmeldung." />
+  <meta property="og:url" content="https://catfood.mariaelia.de/" />
+  <meta property="og:image" content="https://catfood.mariaelia.de/assets/icons/icon-512.png" />
+  <meta name="twitter:card" content="summary" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        "@id": "https://catfood.mariaelia.de/#website",
+        "url": "https://catfood.mariaelia.de/",
+        "name": "Katzenfutter-Rechner",
+        "description": "Berechnet Tagesbedarf und Futtermenge für deine Katze.",
+        "inLanguage": "de",
+        "publisher": { "@id": "https://mariaelia.de/#person" }
+      },
+      {
+        "@type": "WebApplication",
+        "@id": "https://catfood.mariaelia.de/#webapp",
+        "name": "Katzenfutter-Rechner",
+        "alternateName": "Katzenfutter",
+        "url": "https://catfood.mariaelia.de/",
+        "description": "Kostenloser Katzenfutter-Rechner: berechnet Tagesbedarf, Futtermenge und Wasserbedarf deiner Katze basierend auf Gewicht, Status und Futterwerten. Inklusive Tagesplaner für mehrere Mahlzeiten.",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "Any (Progressive Web App)",
+        "browserRequirements": "Requires JavaScript.",
+        "isAccessibleForFree": true,
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+        "inLanguage": "de",
+        "image": "https://catfood.mariaelia.de/assets/icons/icon-512.png",
+        "featureList": [
+          "Tagesbedarf-Rechner nach Gewicht und Status",
+          "Futtermengen-Berechnung aus Weender-Analyse-Werten",
+          "Wasserbedarf-Berechnung inklusive Feuchtigkeit aus Futter",
+          "Tagesplaner für mehrere Mahlzeiten pro Tag",
+          "Speicherbare Katzen- und Futterprofile",
+          "Installierbar als Progressive Web App (Offline-fähig)"
+        ],
+        "isPartOf": { "@id": "https://catfood.mariaelia.de/#website" },
+        "author": { "@id": "https://mariaelia.de/#person" },
+        "publisher": { "@id": "https://mariaelia.de/#person" }
+      },
+      {
+        "@type": "Person",
+        "@id": "https://mariaelia.de/#person",
+        "name": "Maria Elia",
+        "url": "https://mariaelia.de/",
+        "email": "mailto:contact@mariaelia.dev",
+        "sameAs": ["https://mariaelia.de/impressum/", "https://ko-fi.com/mariaelia"]
+      }
+    ]
+  }
+  </script>
 </head>
 
 <body>
@@ -38,6 +101,47 @@
       <img class="onboarding-banner__icon" src="assets/svg/cat.svg" alt="" aria-hidden="true" />
       <div id="onboarding-banner-content" class="onboarding-banner__content"></div>
     </div>
+    <script>
+      // Decides onboarding-banner visibility synchronously
+      (function () {
+        try {
+          var cats = JSON.parse(window.localStorage.getItem("catfood_cats") || "[]");
+          var foods = JSON.parse(window.localStorage.getItem("catfood_foods") || "[]");
+          var hasCats = cats.length > 0;
+          var hasFoods = foods.length > 0;
+          if (hasCats && hasFoods) return;
+          var messages = {
+            both: {
+              text: "Du hast noch keine Katze und kein Futter gespeichert. Leg zuerst unten eine Katze an, dann ein Futter. Danach kannst du hier oben auswählen.",
+              links: [
+                { href: "#katzen", focus: "cat-name", label: "Katze anlegen" },
+                { href: "#futter", focus: "food-name", label: "Futter anlegen" }
+              ]
+            },
+            cat: {
+              text: "Du hast noch keine Katze gespeichert. Leg unten eine an, dann kannst du sie hier oben auswählen.",
+              links: [{ href: "#katzen", focus: "cat-name", label: "Katze anlegen" }]
+            },
+            food: {
+              text: "Du hast noch kein Futter gespeichert. Leg unten eins an, dann kannst du es hier oben auswählen.",
+              links: [{ href: "#futter", focus: "food-name", label: "Futter anlegen" }]
+            }
+          };
+          var kind = !hasCats && !hasFoods ? "both" : !hasCats ? "cat" : "food";
+          var message = messages[kind];
+          var linksHtml = message.links
+            .map(function (link) {
+              return '<a class="onboarding-banner__link" href="' + link.href + '" data-focus="' + link.focus + '">' + link.label + "</a>";
+            })
+            .join("");
+          document.getElementById("onboarding-banner-content").innerHTML =
+            "<p>" + message.text + "</p><div class=\"onboarding-banner__actions\">" + linksHtml + "</div>";
+          document.getElementById("onboarding-banner").hidden = false;
+        } catch (error) {
+          // localStorage unavailable (private mode, etc.) - leave hidden, js/main.js handles the rest.
+        }
+      })();
+    </script>
 
     <div id="sw-update-banner" class="onboarding-banner" hidden>
       <img class="onboarding-banner__icon" src="assets/svg/cat-paw.svg" alt="" aria-hidden="true" />
@@ -135,6 +239,31 @@
           Wähl oben eine Katze und ein Futter aus, um deine Tagesmenge zu berechnen.
         </p>
       </div>
+      <p class="calculator__disclaimer">Richtwert ohne Gewähr &middot; ersetzt keine tierärztliche Beratung, besonders
+        bei Diät, Erkrankung oder Kitten.</p>
+    </section>
+
+    <section id="berechnung" class="calculator info-section">
+      <h2 class="section-title">
+        <img class="section-title__icon" src="assets/svg/cat-bowl.svg" alt="" aria-hidden="true" />
+        So wird berechnet
+      </h2>
+      <p>Der Tagesbedarf deiner Katze basiert auf ihrem Ruheenergiebedarf (RER), berechnet aus dem Körpergewicht
+        nach einer anerkannten Formel der Veterinärernährung (RER = 70 &times; Körpergewicht in kg<sup>0,75</sup>).
+        Je nach Lebensphase und Kastrationsstatus wird dieser Wert angepasst &ndash; kastrierte Katzen haben einen
+        niedrigeren Energiebedarf als unkastrierte, Kitten einen deutlich höheren.</p>
+      <p>Der Energiegehalt deines Futters wird aus den analytischen Bestandteilen berechnet &ndash; genau den
+        Werten, die du auf der Rückseite der Futterverpackung findest (Feuchte, Protein, Fett, Rohfaser,
+        Rohasche). Diese Berechnung folgt dem in der Tierernährung gebräuchlichen Weender-Verfahren mit einer
+        verdaulichkeitskorrigierten Energiewertformel, wie sie auch in der veterinärmedizinischen
+        Fachliteratur verwendet wird.</p>
+      <p class="info-section__example"><strong>Beispiel:</strong> Eine kastrierte, erwachsene Katze mit 4 kg
+        Gewicht hat einen Tagesbedarf von rund 200 kcal. Bei einem Nassfutter mit 85 kcal pro 100 g entspricht das
+        etwa 235 g Futter am Tag, aufgeteilt auf 2&ndash;3 Mahlzeiten.</p>
+      <p class="info-section__meta">Ich habe diesen Rechner gebaut, weil ich selbst oft die Rückseite von
+        Futterverpackungen entziffern musste, um herauszufinden, wie viel meine Katzen wirklich brauchen. Er
+        läuft komplett lokal in deinem Browser &ndash; deine gespeicherten Katzen- und Futterdaten verlassen dein
+        Gerät nie.</p>
     </section>
 
     <section id="mahlzeiten" class="calculator meal-planner">
@@ -343,6 +472,37 @@
       <p class="fun-facts__disclaimer">Liebevoll gemacht für Katzenliebhaber &middot; Alle Angaben ohne Gewähr &middot;
         Tierärztlichen Rat einholen bei Erkrankungen</p>
     </section>
+
+    <section id="faq" class="calculator info-section">
+      <h2 class="section-title">
+        <img class="section-title__icon" src="assets/svg/cat.svg" alt="" aria-hidden="true" />
+        Häufige Fragen
+      </h2>
+      <div class="faq">
+        <div class="faq__item">
+          <h3>Wie oft sollte ich meine Katze füttern?</h3>
+          <p>Die Tagesmenge kannst du auf 3 bis 5 kleine Mahlzeiten aufteilen. Katzen fressen von Natur aus
+            lieber öfter und in kleineren Portionen als ein bis zwei große Mahlzeiten.</p>
+        </div>
+        <div class="faq__item">
+          <h3>Ist Nassfutter oder Trockenfutter besser?</h3>
+          <p>Nassfutter hat einen deutlich höheren Wasseranteil (70&ndash;80&nbsp;% gegenüber ca. 10&nbsp;% bei
+            Trockenfutter) und deckt so einen großen Teil des täglichen Wasserbedarfs mit ab. Trockenfutter ist
+            kalorienreicher pro Gramm.</p>
+        </div>
+        <div class="faq__item">
+          <h3>Was, wenn meine Katze übergewichtig ist?</h3>
+          <p>Wähle bei &bdquo;Status&ldquo; die Option &bdquo;Übergewichtig / Diät&ldquo; &ndash; der Rechner setzt
+            dann einen niedrigeren Energiefaktor an. Eine Gewichtsreduktion sollte langsam und idealerweise
+            tierärztlich begleitet erfolgen.</p>
+        </div>
+        <div class="faq__item">
+          <h3>Woher bekomme ich die Werte Feuchte, Protein, Fett, Rohfaser und Rohasche?</h3>
+          <p>Diese stehen unter &bdquo;Analytische Bestandteile&ldquo; auf der Rückseite der
+            Futterverpackung.</p>
+        </div>
+      </div>
+    </section>
   </main>
 
   <footer class="site-footer">
@@ -358,9 +518,10 @@
             alt="" aria-hidden="true" /></p>
         <a href="mailto:contact@mariaelia.dev" class="site-footer__email">contact@mariaelia.dev</a>
         <a href="https://mariaelia.de/impressum/" class="site-footer__email">Impressum</a>
+        <a href="datenschutz/" class="site-footer__email">Datenschutz</a>
         <button type="button" id="footer-install-link" class="site-footer__email site-footer__button-link">
-          <svg class="site-footer__install-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <svg class="site-footer__install-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M12 3v10" />
             <path d="M8 9l4 4 4-4" />
             <path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2" />
