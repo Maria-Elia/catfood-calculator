@@ -168,6 +168,44 @@ export function mealTotalWaterMl(components, foods) {
   }, 0);
 }
 
+export function autoAdjustComponents(components, foods, dailyKcalNeed) {
+  const locked = [];
+  const unlocked = [];
+
+  for (const component of components) {
+    if (component.locked) {
+      locked.push(component);
+    } else {
+      unlocked.push(component);
+    }
+  }
+
+  if (unlocked.length === 0) {
+    return { error: "no_unlocked", components };
+  }
+
+  const lockedKcal = mealTotalKcal(locked, foods);
+  const targetKcal = dailyKcalNeed - lockedKcal;
+
+  if (targetKcal <= 0) {
+    return { error: "locked_exceed", components };
+  }
+
+  const unlockedKcal = mealTotalKcal(unlocked, foods);
+  if (unlockedKcal <= 0) {
+    return { error: "no_unlocked_kcal", components };
+  }
+
+  const factor = targetKcal / unlockedKcal;
+
+  const adjusted = components.map((component) => {
+    if (component.locked) return component;
+    return { ...component, grams: Math.max(1, Math.round(component.grams * factor)) };
+  });
+
+  return { error: null, components: adjusted };
+}
+
 export function mealStatus(totalKcal, dailyKcalNeed) {
   if (typeof dailyKcalNeed !== "number" || dailyKcalNeed <= 0) {
     throw new Error("Tagesbedarf muss größer als 0 sein.");

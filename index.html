@@ -293,10 +293,15 @@
                 <th class="meal-planner__th--per-meal">Pro Mahlzeit</th>
                 <th>kcal</th>
                 <th></th>
+                <th></th>
               </tr>
             </thead>
             <tbody id="meal-component-list"></tbody>
           </table>
+        </div>
+        <div id="meal-auto-adjust" class="meal-planner__auto-adjust" hidden>
+          <button type="button" id="meal-auto-adjust-btn" class="btn-pill btn-pill--secondary">Tagesbedarf decken</button>
+          <p id="meal-auto-adjust-error" class="form-error" hidden></p>
         </div>
         <p id="meal-empty" class="empty-state">Noch keinen Tagesplan zusammengestellt.</p>
 

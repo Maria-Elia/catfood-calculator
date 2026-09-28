@@ -11,6 +11,7 @@ import {
   mealTotalKcal,
   mealTotalWaterMl,
   mealStatus,
+  autoAdjustComponents,
 } from "./calc.js";
 
 const STATUS_BADGE_LABELS = {
@@ -47,6 +48,9 @@ export function initMealPlanner({ catStore, foodStore }) {
   const saveError = document.getElementById("meal-save-error");
   const savedList = document.getElementById("meal-saved-list");
   const savedEmpty = document.getElementById("meal-saved-empty");
+  const autoAdjust = document.getElementById("meal-auto-adjust");
+  const autoAdjustBtn = document.getElementById("meal-auto-adjust-btn");
+  const autoAdjustError = document.getElementById("meal-auto-adjust-error");
 
   function resetDraft() {
     draftComponents = [];
@@ -92,7 +96,12 @@ export function initMealPlanner({ catStore, foodStore }) {
       const food = foods.find((item) => item.id === component.foodId);
       const kcal = (component.grams / 100) * foodEnergyKcalPer100g(food);
       const meals = component.meals || 1;
+      const locked = component.locked || false;
       const perMeal = Math.round(component.grams / meals);
+      const lockLabel = locked ? "Entsperren" : "Sperren";
+      const lockSvg = locked
+        ? '<svg class="meal-planner__lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>'
+        : '<svg class="meal-planner__lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>';
 
       const row = document.createElement("tr");
       row.dataset.foodId = component.foodId;
@@ -103,10 +112,15 @@ export function initMealPlanner({ catStore, foodStore }) {
         <td><input type="number" class="meal-planner__meals-input" value="${meals}" min="1" step="1" /></td>
         <td class="meal-planner__td--per-meal">${perMeal} g</td>
         <td>${Math.round(kcal)} kcal</td>
+        <td><button type="button" class="meal-planner__lock-btn ${locked ? "meal-planner__lock-btn--active" : ""}" data-action="lock" aria-label="${lockLabel}" aria-pressed="${locked}">${lockSvg}</button></td>
         <td><button type="button" class="btn-text" data-action="remove">Entfernen</button></td>
       `;
       componentList.appendChild(row);
     }
+
+    const hasUnlocked = draftComponents.some((c) => !c.locked);
+    autoAdjust.hidden = draftComponents.length === 0 || !hasUnlocked;
+    autoAdjustError.hidden = true;
 
     if (draftComponents.length === 0) {
       summary.hidden = true;
@@ -234,7 +248,9 @@ export function initMealPlanner({ catStore, foodStore }) {
       return;
     }
 
-    draftComponents = [...draftComponents, { foodId, grams, meals: 1 }];
+    const food = foodStore.list().find((item) => item.id === foodId);
+    const defaultLocked = food && food.typ === "zusatz";
+    draftComponents = [...draftComponents, { foodId, grams, meals: 1, locked: defaultLocked }];
     foodSelect.value = "";
     gramsInput.value = "";
     render();
@@ -274,12 +290,22 @@ export function initMealPlanner({ catStore, foodStore }) {
   });
 
   componentList.addEventListener("click", (event) => {
-    const button = event.target.closest('button[data-action="remove"]');
-    if (!button) return;
+    const removeBtn = event.target.closest('button[data-action="remove"]');
+    if (removeBtn) {
+      const foodId = removeBtn.closest("tr").dataset.foodId;
+      draftComponents = draftComponents.filter((component) => component.foodId !== foodId);
+      render();
+      return;
+    }
 
-    const foodId = button.closest("tr").dataset.foodId;
-    draftComponents = draftComponents.filter((component) => component.foodId !== foodId);
-    render();
+    const lockBtn = event.target.closest('button[data-action="lock"]');
+    if (lockBtn) {
+      const foodId = lockBtn.closest("tr").dataset.foodId;
+      draftComponents = draftComponents.map((component) =>
+        component.foodId === foodId ? { ...component, locked: !component.locked } : component,
+      );
+      render();
+    }
   });
 
   saveBtn.addEventListener("click", () => {
@@ -342,10 +368,44 @@ export function initMealPlanner({ catStore, foodStore }) {
     }
   });
 
+  autoAdjustBtn.addEventListener("click", () => {
+    autoAdjustError.hidden = true;
+    const catId = catSelect.value;
+    const cat = catStore.list().find((item) => item.id === catId);
+    if (!cat) return;
+
+    const foods = foodStore.list();
+    const dailyKcal = dailyEnergyNeedKcal(cat.gewicht, cat.status);
+    const result = autoAdjustComponents(draftComponents, foods, dailyKcal);
+
+    if (result.error === "locked_exceed") {
+      autoAdjustError.textContent = "Gesperrte Futter decken bereits den Tagesbedarf.";
+      autoAdjustError.hidden = false;
+      return;
+    }
+    if (result.error === "no_unlocked_kcal") {
+      autoAdjustError.textContent = "Entsperrte Futter haben 0 kcal — Anpassung nicht möglich.";
+      autoAdjustError.hidden = false;
+      return;
+    }
+
+    draftComponents = result.components;
+    render();
+
+    summaryBadge.classList.add("meal-summary__badge--pulse");
+    summaryBadge.addEventListener(
+      "animationend",
+      () => summaryBadge.classList.remove("meal-summary__badge--pulse"),
+      { once: true },
+    );
+  });
+
   function useAsMealBase(catId, foodId, grams) {
     refreshCatOptions();
     catSelect.value = catId;
-    draftComponents = [{ foodId, grams, meals: 1 }];
+    const food = foodStore.list().find((item) => item.id === foodId);
+    const defaultLocked = food && food.typ === "zusatz";
+    draftComponents = [{ foodId, grams, meals: 1, locked: defaultLocked }];
     editingMealId = null;
     nameInput.value = "";
     render();

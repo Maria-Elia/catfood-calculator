@@ -834,6 +834,70 @@ body:has(.legal-page) {
   white-space: nowrap;
 }
 
+.meal-planner__lock-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.4rem;
+  border-radius: 0.6rem;
+  color: var(--ink-soft);
+  opacity: 0.5;
+  transition: opacity 0.15s, transform 160ms ease-out;
+}
+
+.meal-planner__lock-btn:hover {
+  opacity: 0.8;
+}
+
+.meal-planner__lock-btn:active {
+  transform: scale(0.92);
+}
+
+.meal-planner__lock-btn--active {
+  opacity: 1;
+  color: var(--teal-deep);
+}
+
+.meal-planner__lock-icon {
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.meal-planner__auto-adjust {
+  margin-top: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+
+.meal-planner__auto-adjust[hidden] {
+  display: none;
+}
+
+.btn-pill--secondary {
+  background: var(--bg);
+  color: var(--teal-deep);
+  border-color: var(--teal);
+}
+
+.btn-pill--secondary:hover {
+  background: var(--teal-tint);
+}
+
+@keyframes badge-pulse {
+  0% { box-shadow: 0 0 0 0 var(--green-tint); }
+  50% { box-shadow: 0 0 0 6px var(--green-tint); }
+  100% { box-shadow: 0 0 0 0 var(--green-tint); }
+}
+
+.meal-summary__badge--pulse {
+  animation: badge-pulse 0.4s ease-out;
+}
+
 .meal-planner__divider {
   border-top: 1px solid var(--line);
   margin: 0.6rem 0;
