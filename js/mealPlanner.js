@@ -48,6 +48,7 @@ export function initMealPlanner({ catStore, foodStore }) {
   const saveError = document.getElementById("meal-save-error");
   const savedList = document.getElementById("meal-saved-list");
   const savedEmpty = document.getElementById("meal-saved-empty");
+  const lockHint = document.getElementById("meal-lock-hint");
   const autoAdjust = document.getElementById("meal-auto-adjust");
   const autoAdjustBtn = document.getElementById("meal-auto-adjust-btn");
   const autoAdjustError = document.getElementById("meal-auto-adjust-error");
@@ -121,6 +122,7 @@ export function initMealPlanner({ catStore, foodStore }) {
     }
 
     const hasUnlocked = draftComponents.some((c) => !c.locked);
+    lockHint.hidden = draftComponents.length === 0;
     autoAdjust.hidden = draftComponents.length === 0 || !hasUnlocked;
     autoAdjustError.hidden = true;
 
@@ -445,7 +447,7 @@ export function initMealPlanner({ catStore, foodStore }) {
       return;
     }
     if (result.error === "no_unlocked_kcal") {
-      autoAdjustError.textContent = "Entsperrte Futter haben 0 kcal — Anpassung nicht möglich.";
+      autoAdjustError.textContent = "Entsperrte Futter haben 0 kcal - Anpassung nicht möglich.";
       autoAdjustError.hidden = false;
       return;
     }

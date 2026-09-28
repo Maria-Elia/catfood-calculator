@@ -389,7 +389,7 @@ const foodIoMessage = document.getElementById("food-io-message");
 let ioMessageTimer = null;
 
 function updateExportVisibility() {
-  foodExportBtn.hidden = foodStore.list().length === 0;
+  if (foodExportBtn) foodExportBtn.hidden = foodStore.list().length === 0;
 }
 
 function showIoMessage(text, isError) {
@@ -422,7 +422,7 @@ function deduplicateName(name, existingNames) {
   return `${name} (${counter})`;
 }
 
-foodExportBtn.addEventListener("click", () => {
+if (foodExportBtn) foodExportBtn.addEventListener("click", () => {
   const foods = foodStore.list().map((food) => {
     const exported = { name: food.name, typ: food.typ };
     if (food.typ === "zusatz") {
@@ -448,12 +448,12 @@ foodExportBtn.addEventListener("click", () => {
   URL.revokeObjectURL(url);
 });
 
-foodImportBtn.addEventListener("click", () => {
+if (foodImportBtn) foodImportBtn.addEventListener("click", () => {
   foodIoMessage.hidden = true;
   foodImportFile.click();
 });
 
-foodImportFile.addEventListener("change", () => {
+if (foodImportFile) foodImportFile.addEventListener("change", () => {
   const file = foodImportFile.files[0];
   if (!file) return;
 

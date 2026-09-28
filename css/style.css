@@ -866,6 +866,12 @@ body:has(.legal-page) {
   height: 1.6rem;
 }
 
+.meal-planner__lock-hint {
+  font-size: 1.2rem;
+  color: var(--ink-soft);
+  margin-top: 0.8rem;
+}
+
 .meal-planner__auto-adjust {
   margin-top: 1.2rem;
   display: flex;
