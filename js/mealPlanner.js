@@ -51,6 +51,8 @@ export function initMealPlanner({ catStore, foodStore }) {
   const autoAdjust = document.getElementById("meal-auto-adjust");
   const autoAdjustBtn = document.getElementById("meal-auto-adjust-btn");
   const autoAdjustError = document.getElementById("meal-auto-adjust-error");
+  const overviewList = document.getElementById("meal-overview-list");
+  const overviewEmpty = document.getElementById("meal-overview-empty");
 
   function resetDraft() {
     draftComponents = [];
@@ -190,12 +192,70 @@ export function initMealPlanner({ catStore, foodStore }) {
     }
   }
 
+  const LOCK_SVG_SMALL = '<svg class="meal-overview__lock-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>';
+
+  function renderAllPlans() {
+    const cats = catStore.list();
+    const foods = foodStore.list();
+    overviewList.innerHTML = "";
+    let totalPlans = 0;
+
+    for (const cat of cats) {
+      const meals = mealStore.list(cat.id).map((meal) => {
+        const components = meal.components.filter((component) =>
+          foods.some((food) => food.id === component.foodId),
+        );
+        return { ...meal, components };
+      });
+
+      if (meals.length === 0) continue;
+
+      const dailyKcal = dailyEnergyNeedKcal(cat.gewicht, cat.status);
+
+      for (const meal of meals) {
+        totalPlans++;
+        const totalKcal = mealTotalKcal(meal.components, foods);
+        const { status, deviationPercent } = mealStatus(totalKcal, dailyKcal);
+
+        const componentLines = meal.components
+          .map((component) => {
+            const food = foods.find((item) => item.id === component.foodId);
+            if (!food) return "";
+            const m = component.meals || 1;
+            const mealSplit = m > 1 ? `<span class="meal-overview__split">${m}× ${Math.round(component.grams / m)}g</span>` : "";
+            const lockIcon = component.locked ? ` <span class="meal-overview__lock">${LOCK_SVG_SMALL}</span>` : "";
+            return `<div class="meal-overview__food">${food.name}: ${component.grams}g ${mealSplit}${lockIcon}</div>`;
+          })
+          .join("");
+
+        const sign = deviationPercent >= 0 ? "+" : "";
+        const card = document.createElement("div");
+        card.className = "meal-overview__card";
+        card.innerHTML = `
+          <div class="meal-overview__header">
+            <span class="meal-overview__plan-name">${meal.name}</span>
+            <span class="meal-overview__cat-name">${cat.name}</span>
+          </div>
+          <div class="meal-overview__foods">${componentLines}</div>
+          <div class="meal-overview__footer">
+            <span class="meal-overview__total">${Math.round(totalKcal)} / ${Math.round(dailyKcal)} kcal</span>
+            <span class="meal-summary__badge meal-summary__badge--${status}">${sign}${Math.round(deviationPercent)}%</span>
+          </div>
+        `;
+        overviewList.appendChild(card);
+      }
+    }
+
+    overviewEmpty.hidden = totalPlans > 0;
+  }
+
   function render() {
     const catId = catSelect.value;
 
     if (!catId) {
       plannerBody.hidden = true;
       catHint.hidden = false;
+      renderAllPlans();
       return;
     }
 
@@ -207,6 +267,7 @@ export function initMealPlanner({ catStore, foodStore }) {
 
     renderDraft(cat, foods);
     renderSavedMeals(catId, foods);
+    renderAllPlans();
   }
 
   function refresh() {
