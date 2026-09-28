@@ -256,6 +256,7 @@ foodForm.addEventListener("submit", (event) => {
 
     resetFoodForm();
     renderFoodList();
+    updateExportVisibility();
     renderFoodOptions();
     updateResult();
     mealPlanner.refresh();
@@ -335,6 +336,7 @@ foodForm.addEventListener("submit", (event) => {
 
   resetFoodForm();
   renderFoodList();
+  updateExportVisibility();
   renderFoodOptions();
   updateResult();
   mealPlanner.refresh();
@@ -369,6 +371,7 @@ foodList.addEventListener("click", (event) => {
   if (button.dataset.action === "delete") {
     foodStore.remove(id);
     renderFoodList();
+    updateExportVisibility();
     renderFoodOptions();
     updateResult();
     mealPlanner.refresh();
@@ -376,6 +379,161 @@ foodList.addEventListener("click", (event) => {
 });
 
 renderFoodList();
+
+// ---- Food Export/Import ----
+
+const foodExportBtn = document.getElementById("food-export-btn");
+const foodImportBtn = document.getElementById("food-import-btn");
+const foodImportFile = document.getElementById("food-import-file");
+const foodIoMessage = document.getElementById("food-io-message");
+let ioMessageTimer = null;
+
+function updateExportVisibility() {
+  foodExportBtn.hidden = foodStore.list().length === 0;
+}
+
+function showIoMessage(text, isError) {
+  clearTimeout(ioMessageTimer);
+  foodIoMessage.textContent = text;
+  foodIoMessage.className = `food-io__message ${isError ? "food-io__message--error" : "food-io__message--success"}`;
+  foodIoMessage.hidden = false;
+
+  if (!isError) {
+    ioMessageTimer = setTimeout(() => {
+      foodIoMessage.classList.add("food-io__message--fade");
+      foodIoMessage.addEventListener(
+        "transitionend",
+        () => {
+          foodIoMessage.hidden = true;
+          foodIoMessage.classList.remove("food-io__message--fade");
+        },
+        { once: true },
+      );
+    }, 5000);
+  }
+}
+
+function deduplicateName(name, existingNames) {
+  if (!existingNames.includes(name)) return name;
+  let counter = 2;
+  while (existingNames.includes(`${name} (${counter})`)) {
+    counter++;
+  }
+  return `${name} (${counter})`;
+}
+
+foodExportBtn.addEventListener("click", () => {
+  const foods = foodStore.list().map((food) => {
+    const exported = { name: food.name, typ: food.typ };
+    if (food.typ === "zusatz") {
+      exported.kcalPer100g = food.kcalPer100g;
+    } else {
+      exported.feuchte = food.feuchte;
+      exported.protein = food.protein;
+      exported.fett = food.fett;
+      exported.rohfaser = food.rohfaser;
+      exported.rohasche = food.rohasche;
+    }
+    return exported;
+  });
+
+  const data = JSON.stringify({ version: 1, type: "catfood_foods", foods }, null, 2);
+  const blob = new Blob([data], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const date = new Date().toISOString().slice(0, 10);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `katzenfutter-export-${date}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+foodImportBtn.addEventListener("click", () => {
+  foodIoMessage.hidden = true;
+  foodImportFile.click();
+});
+
+foodImportFile.addEventListener("change", () => {
+  const file = foodImportFile.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    let parsed;
+    try {
+      parsed = JSON.parse(reader.result);
+    } catch {
+      showIoMessage("Ungültige Datei.", true);
+      foodImportFile.value = "";
+      return;
+    }
+
+    if (parsed.version !== 1 || parsed.type !== "catfood_foods" || !Array.isArray(parsed.foods)) {
+      showIoMessage("Ungültiges Format — erwartet wird eine Katzenfutter-Exportdatei.", true);
+      foodImportFile.value = "";
+      return;
+    }
+
+    const existingNames = foodStore.list().map((f) => f.name);
+    let imported = 0;
+    let skipped = 0;
+
+    for (const raw of parsed.foods) {
+      if (!raw.name || typeof raw.name !== "string" || !raw.typ) {
+        skipped++;
+        continue;
+      }
+
+      const entry = { name: raw.name.trim(), typ: raw.typ };
+
+      if (entry.typ === "zusatz") {
+        entry.feuchte = 0;
+        entry.kcalPer100g = Number(raw.kcalPer100g);
+      } else {
+        entry.feuchte = Number(raw.feuchte);
+        entry.protein = Number(raw.protein);
+        entry.fett = Number(raw.fett);
+        entry.rohfaser = Number(raw.rohfaser);
+        entry.rohasche = Number(raw.rohasche);
+
+        if (entry.feuchte === FEUCHTE_DEFAULTS[entry.typ]) {
+          entry.feuchteGeschaetzt = true;
+        } else {
+          entry.feuchteGeschaetzt = false;
+        }
+      }
+
+      try {
+        foodEnergyKcalPer100g(entry);
+      } catch {
+        skipped++;
+        continue;
+      }
+
+      entry.name = deduplicateName(entry.name, existingNames);
+      existingNames.push(entry.name);
+
+      foodStore.add(entry);
+      imported++;
+    }
+
+    let message = `${imported} von ${parsed.foods.length} Futtern importiert.`;
+    if (skipped > 0) {
+      message += ` ${skipped} übersprungen (ungültige Daten).`;
+    }
+    showIoMessage(message, false);
+
+    renderFoodList();
+    renderFoodOptions();
+    updateResult();
+    updateExportVisibility();
+    mealPlanner.refresh();
+    foodImportFile.value = "";
+  };
+  reader.readAsText(file);
+});
+
+updateExportVisibility();
 
 // ---- Calculator ----
 

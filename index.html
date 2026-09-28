@@ -445,6 +445,12 @@
       </form>
       <ul id="food-list" class="profile-list"></ul>
       <p id="food-empty" class="empty-state">Noch kein Futter gespeichert.</p>
+      <div class="food-io">
+        <button type="button" id="food-export-btn" class="btn-pill btn-pill--secondary" hidden>Futter exportieren</button>
+        <button type="button" id="food-import-btn" class="btn-pill btn-pill--secondary">Futter importieren</button>
+        <input type="file" id="food-import-file" accept=".json" hidden />
+        <p id="food-io-message" class="food-io__message" hidden></p>
+      </div>
     </section>
 
     <section id="fakten" class="fun-facts">

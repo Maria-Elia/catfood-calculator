@@ -983,6 +983,36 @@ body:has(.legal-page) {
   color: var(--ink);
 }
 
+.food-io {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 1.6rem;
+}
+
+.food-io__message {
+  width: 100%;
+  padding: 0.8rem 1.2rem;
+  border-radius: 0.8rem;
+  font-size: 1.3rem;
+  transition: opacity 0.3s ease-out;
+}
+
+.food-io__message--fade {
+  opacity: 0;
+}
+
+.food-io__message--success {
+  background: var(--green-tint);
+  color: var(--green-deep);
+}
+
+.food-io__message--error {
+  background: var(--red-tint);
+  color: var(--red-deep);
+}
+
 .meal-planner__divider {
   border-top: 1px solid var(--line);
   margin: 0.6rem 0;
@@ -1426,6 +1456,11 @@ body:has(.legal-page) {
 
   .meal-overview {
     grid-template-columns: 1fr;
+  }
+
+  .food-io {
+    flex-direction: column;
+    align-items: stretch;
   }
 }
 
