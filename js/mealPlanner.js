@@ -91,13 +91,17 @@ export function initMealPlanner({ catStore, foodStore }) {
     for (const component of draftComponents) {
       const food = foods.find((item) => item.id === component.foodId);
       const kcal = (component.grams / 100) * foodEnergyKcalPer100g(food);
+      const meals = component.meals || 1;
+      const perMeal = Math.round(component.grams / meals);
 
       const row = document.createElement("tr");
       row.dataset.foodId = component.foodId;
       row.innerHTML = `
         <td>${food.name}</td>
-        <td>${FOOD_TYPE_LABELS[food.typ]}</td>
+        <td class="meal-planner__td--typ">${FOOD_TYPE_LABELS[food.typ]}</td>
         <td><input type="number" class="meal-planner__grams-input" value="${component.grams}" min="1" step="1" /></td>
+        <td><input type="number" class="meal-planner__meals-input" value="${meals}" min="1" step="1" /></td>
+        <td class="meal-planner__td--per-meal">${perMeal} g</td>
         <td>${Math.round(kcal)} kcal</td>
         <td><button type="button" class="btn-text" data-action="remove">Entfernen</button></td>
       `;
@@ -143,6 +147,16 @@ export function initMealPlanner({ catStore, foodStore }) {
 
     for (const meal of meals) {
       const totalKcal = mealTotalKcal(meal.components, foods);
+      const componentSummary = meal.components
+        .map((component) => {
+          const food = foods.find((item) => item.id === component.foodId);
+          if (!food) return null;
+          const m = component.meals || 1;
+          const mealText = m > 1 ? ` (${m}× ${Math.round(component.grams / m)}g)` : "";
+          return `${food.name}: ${component.grams}g${mealText}`;
+        })
+        .filter(Boolean)
+        .join(" · ");
 
       const li = document.createElement("li");
       li.className = "profile-card";
@@ -150,6 +164,7 @@ export function initMealPlanner({ catStore, foodStore }) {
       li.innerHTML = `
         <div class="profile-card__main">
           <span class="profile-card__name">${meal.name}</span>
+          <span class="profile-card__meta">${componentSummary}</span>
           <span class="profile-card__kcal">${Math.round(totalKcal)} kcal</span>
         </div>
         <div class="profile-card__actions">
@@ -219,26 +234,42 @@ export function initMealPlanner({ catStore, foodStore }) {
       return;
     }
 
-    draftComponents = [...draftComponents, { foodId, grams }];
+    draftComponents = [...draftComponents, { foodId, grams, meals: 1 }];
     foodSelect.value = "";
     gramsInput.value = "";
     render();
   });
 
   componentList.addEventListener("change", (event) => {
-    const input = event.target.closest(".meal-planner__grams-input");
-    if (!input) return;
+    const gramsEl = event.target.closest(".meal-planner__grams-input");
+    const mealsEl = event.target.closest(".meal-planner__meals-input");
 
-    const grams = Number(input.value);
-    if (!(grams > 0)) {
-      render(); // reset the input back to the last valid value
-      return;
+    if (!gramsEl && !mealsEl) return;
+
+    const foodId = event.target.closest("tr").dataset.foodId;
+
+    if (gramsEl) {
+      const grams = Number(gramsEl.value);
+      if (!(grams > 0)) {
+        render();
+        return;
+      }
+      draftComponents = draftComponents.map((component) =>
+        component.foodId === foodId ? { ...component, grams } : component,
+      );
     }
 
-    const foodId = input.closest("tr").dataset.foodId;
-    draftComponents = draftComponents.map((component) =>
-      component.foodId === foodId ? { ...component, grams } : component,
-    );
+    if (mealsEl) {
+      const meals = Math.max(1, Math.round(Number(mealsEl.value)));
+      if (!(meals >= 1)) {
+        render();
+        return;
+      }
+      draftComponents = draftComponents.map((component) =>
+        component.foodId === foodId ? { ...component, meals } : component,
+      );
+    }
+
     render();
   });
 
@@ -314,7 +345,7 @@ export function initMealPlanner({ catStore, foodStore }) {
   function useAsMealBase(catId, foodId, grams) {
     refreshCatOptions();
     catSelect.value = catId;
-    draftComponents = [{ foodId, grams }];
+    draftComponents = [{ foodId, grams, meals: 1 }];
     editingMealId = null;
     nameInput.value = "";
     render();
